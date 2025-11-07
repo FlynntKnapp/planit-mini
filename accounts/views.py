@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.detail import DetailView
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from accounts.forms import CustomUserCreationForm, CustomUserChangeForm
@@ -40,6 +40,29 @@ class CustomUserLoginView(LoginView):
         context = super().get_context_data(**kwargs)
         context["the_site_name"] = THE_SITE_NAME
         return context
+
+
+class CustomUserLogoutView(LogoutView):
+    """
+    Override the default logout view to allow both GET and POST requests.
+    Django 5.x only allows POST requests by default for security reasons,
+    but we need to support GET requests for simple logout links.
+
+    For GET requests, we'll directly log out the user instead of showing
+    a confirmation page.
+
+    SECURITY NOTE: Allowing GET requests for logout bypasses CSRF protection
+    and could potentially allow logout via external links. For production,
+    consider updating templates to use a POST form for logout instead.
+    """
+
+    http_method_names = ["get", "post"]
+
+    def get(self, request, *args, **kwargs):
+        """
+        Override GET to perform logout directly instead of showing confirmation.
+        """
+        return self.post(request, *args, **kwargs)
 
 
 class CustomUserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
