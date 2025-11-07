@@ -275,3 +275,98 @@ class CustomUserDetailViewTest(TestCase):
             )
         )
         self.assertEqual(response.status_code, 403)
+
+
+class CustomUserLogoutViewTest(TestCase):
+    """
+    Tests for `CustomUserLogoutView`.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Create a test user and add it as an attribute of the `cls`.
+        """
+        cls.a_test_user = CustomUser.objects.create_user(
+            username="DezziKitten",
+            password="MeowMeow42",
+            email="DezziKitten@purr.scratch",
+        )
+
+    def test_logout_url_exists_with_get(self):
+        """
+        URL "/accounts/logout/" should accept GET requests and redirect.
+        """
+        self.client.force_login(self.a_test_user)
+        response = self.client.get("/accounts/logout/")
+        # LogoutView redirects after logout
+        self.assertEqual(response.status_code, 302)
+
+    def test_logout_url_accessible_by_name_with_get(self):
+        """
+        View name "logout" should accept GET requests and redirect.
+        """
+        self.client.force_login(self.a_test_user)
+        response = self.client.get(reverse("logout"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_logout_url_exists_with_post(self):
+        """
+        URL "/accounts/logout/" should accept POST requests and redirect.
+        """
+        self.client.force_login(self.a_test_user)
+        response = self.client.post("/accounts/logout/")
+        # LogoutView redirects after logout
+        self.assertEqual(response.status_code, 302)
+
+    def test_logout_url_accessible_by_name_with_post(self):
+        """
+        View name "logout" should accept POST requests and redirect.
+        """
+        self.client.force_login(self.a_test_user)
+        response = self.client.post(reverse("logout"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_logout_actually_logs_out_user_with_get(self):
+        """
+        GET request to logout should actually log out the user.
+        """
+        self.client.force_login(self.a_test_user)
+        # Verify user is logged in
+        response = self.client.get(
+            reverse("detail", kwargs={"pk": self.a_test_user.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Logout
+        self.client.get(reverse("logout"))
+
+        # Verify user is logged out by trying to access a protected page
+        response = self.client.get(
+            reverse("detail", kwargs={"pk": self.a_test_user.pk})
+        )
+        # Should redirect to login page
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_logout_actually_logs_out_user_with_post(self):
+        """
+        POST request to logout should actually log out the user.
+        """
+        self.client.force_login(self.a_test_user)
+        # Verify user is logged in
+        response = self.client.get(
+            reverse("detail", kwargs={"pk": self.a_test_user.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Logout
+        self.client.post(reverse("logout"))
+
+        # Verify user is logged out by trying to access a protected page
+        response = self.client.get(
+            reverse("detail", kwargs={"pk": self.a_test_user.pk})
+        )
+        # Should redirect to login page
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
