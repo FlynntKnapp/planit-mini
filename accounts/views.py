@@ -50,9 +50,13 @@ class CustomUserLogoutView(LogoutView):
 
     For GET requests, we'll directly log out the user instead of showing
     a confirmation page.
+
+    SECURITY NOTE: Allowing GET requests for logout bypasses CSRF protection
+    and could potentially allow logout via external links. For production,
+    consider updating templates to use a POST form for logout instead.
     """
 
-    http_method_names = ["get", "post", "options"]
+    http_method_names = ["get", "post"]
 
     def get(self, request, *args, **kwargs):
         """
