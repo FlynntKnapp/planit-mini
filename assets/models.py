@@ -2,6 +2,8 @@
 
 from django.db import models
 
+from core.models import Workspace
+
 
 class FormFactor(models.Model):
     name = models.CharField(max_length=80, unique=True)
@@ -21,12 +23,24 @@ class Application(models.Model):
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=120, unique=True)
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, related_name="projects"
+    )
+    name = models.CharField(max_length=120)
     description = models.TextField(blank=True)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField()
+
+    class Meta:
+        unique_together = [("workspace", "slug")]
 
 
 class Asset(models.Model):
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, related_name="assets"
+    )
+    project = models.ForeignKey(
+        Project, null=True, blank=True, on_delete=models.SET_NULL, related_name="assets"
+    )
     KIND_CHOICES = [("PI", "Raspberry Pi"), ("SRV", "Server"), ("LAP", "Laptop")]
     name = models.CharField(max_length=120)
     kind = models.CharField(max_length=3, choices=KIND_CHOICES)
