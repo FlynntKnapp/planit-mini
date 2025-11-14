@@ -28,7 +28,7 @@
 * [ ] **Postgres** via `dj-database-url` (`DATABASE_URL`)
 * [ ] **Redis cache** (`REDIS_URL`) + DRF settings stub
 * [ ] **Celery**: add `config/celery.py` + loader in `config/__init__.py`
-* [ ] **.env.example**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DEBUG`, `ALLOWED_HOSTS`
+* [x] **.env.example**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DEBUG`, `ALLOWED_HOSTS`
 * [ ] **Makefile**: `run`, `test`, `lint`, `migrate`, `seed`, `superuser`
 * [x] **README skeleton** present; will replace with Plan-It specifics & screenshots.
 * [x] **Precommit/linting**: `.flake8` already in repo (add `ruff`, `black`, `isort` via pre-commit).
