@@ -15,6 +15,10 @@ python-dotenv = "*"
 isort = "*"
 flake8 = "*"
 black = "*"
+celery = "*"
+djangorestframework = "*"
+django-storages = "*"
+django-celery-beat = "*"
 
 [dev-packages]
 
