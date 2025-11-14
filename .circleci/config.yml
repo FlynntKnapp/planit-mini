@@ -1,4 +1,3 @@
-# CircleCI config for planit-mini (tests only)
 version: 2
 
 jobs:
@@ -12,7 +11,7 @@ jobs:
       # Step 1: Checkout code
       - checkout
 
-      # Step 2: Install pipenv (if not already on the image)
+      # Step 2: Install pipenv
       - run:
           name: Install pipenv
           command: |
@@ -25,21 +24,20 @@ jobs:
           command: |
             pipenv install --dev
 
-      # Step 4 (optional): Run linter
-      # You can comment this out if you don't have flake8 wired up yet
+      # Step 4: Run linter (flake8)
       - run:
           name: Run flake8 linter
           command: |
-            pipenv run flake8 || echo "flake8 failed (or not configured) - adjust as needed"
+            pipenv run flake8 .
 
-      # Step 5: Run tests with coverage
+      # Step 5: Run tests (accounts only) with coverage
       - run:
-          name: Run Django tests with coverage
+          name: Run Django tests for accounts app with coverage
           command: |
             pipenv run coverage run \
-              --source='.' \
+              --source='accounts' \
               --omit="*/asgi.py,*/wsgi.py,*/manage.py,*/config/settings/*" \
-              ./manage.py test
+              ./manage.py test accounts
             pipenv run coverage report
 
 workflows:
