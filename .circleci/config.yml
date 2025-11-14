@@ -38,7 +38,7 @@ jobs:
               --source='accounts' \
               --omit="*/asgi.py,*/wsgi.py,*/manage.py,*/config/settings/*" \
               ./manage.py test accounts
-            pipenv run coverage report
+            pipenv run coverage report --fail-under=80
 
 workflows:
   version: 2
