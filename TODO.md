@@ -21,7 +21,7 @@
   * Generated from `DjangoStarter-heroku` for a clean base.
 * [x] **Python env**: **Pipenv** (Pipfile) included by template.
 * [x] **Django project** exists (`config/`, `manage.py`).
-* [ ] **Apps**: add `core`, `assets`, `work`  
+* [x] **Apps**: add `core`, `assets`, `work`  
   - `python manage.py startapp core && startapp assets && startapp work`
 * [x] **Install base apps already present**: `accounts` custom user.
 * [x] **Settings split**: DEV/PROD present in template; keep and extend.
