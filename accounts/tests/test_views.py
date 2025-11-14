@@ -65,12 +65,12 @@ class CustomUserSignUpViewTest(TestCase):
 
     def test_context_has_the_site_name(self):
         """
-        View `context` should have a value of "DjangoCustomUserStarter" for
+        View `context` should have a value of "Plan-It Mini" for
         "the_site_name".
         """
         response = self.client.get("/accounts/signup/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["the_site_name"], "DjangoCustomUserStarter")
+        self.assertEqual(response.context["the_site_name"], "Plan-It Mini")
 
 
 class CustomUserLoginViewTest(TestCase):
@@ -94,12 +94,12 @@ class CustomUserLoginViewTest(TestCase):
 
     def test_context_has_the_site_name(self):
         """
-        View `context` should have a value "DjangoCustomUserStarter" for
+        View `context` should have a value "Plan-It Mini" for
         "the_site_name".
         """
         response = self.client.get("/accounts/login/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["the_site_name"], "DjangoCustomUserStarter")
+        self.assertEqual(response.context["the_site_name"], "Plan-It Mini")
 
 
 class CustomUserUpdateViewTest(TestCase):
@@ -186,7 +186,7 @@ class CustomUserUpdateViewTest(TestCase):
 
     def test_the_site_name_in_context(self):
         """
-        View `context` should have a value of "DjangoCustomUserStarter" for
+        View `context` should have a value of "Plan-It Mini" for
         "the_site_name".
         """
         self.client.force_login(self.a_test_user)
@@ -197,7 +197,7 @@ class CustomUserUpdateViewTest(TestCase):
             )
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["the_site_name"], "DjangoCustomUserStarter")
+        self.assertEqual(response.context["the_site_name"], "Plan-It Mini")
 
 
 class CustomUserDetailViewTest(TestCase):
