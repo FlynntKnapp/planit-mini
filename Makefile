@@ -1,9 +1,48 @@
-.PHONY: isort_dry_run clean test coverage makemigrations migrate makemigrate runserver createuser shell delete_db resetdb
+# Simple Makefile helpers for this Django project
 
-# Run isort
-# TODO: Exclude migration files-
+# --------------------------------------------------------------------
+# Configurable commands
+# --------------------------------------------------------------------
+PYTHON := python
+MANAGE := $(PYTHON) manage.py
+ISORT  := isort
+
+# Common isort exclusions: venvs, git, node_modules, Django migrations, etc.
+ISORT_EXCLUDES := \
+	--skip .venv \
+	--skip venv \
+	--skip env \
+	--skip node_modules \
+	--skip .git \
+	--skip-glob "*/migrations/*"
+
+# Default target
+.DEFAULT_GOAL := help
+
+.PHONY: isort isort_dry_run clean test coverage makemigrations migrate \
+        makemigrate runserver run createuser superuser shell delete_db \
+        resetdb seed lint help
+
+# --------------------------------------------------------------------
+# Formatting / Linting
+# --------------------------------------------------------------------
+
+# Run isort in dry-run mode (no changes, just diff) on real code only
+# Excludes virtualenvs, git, node_modules, and Django migrations
 isort_dry_run:
-	isort --check-only --diff .
+	$(ISORT) $(ISORT_EXCLUDES) --check-only --diff .
+
+# Run isort and actually sort imports in-place
+isort:
+	$(ISORT) $(ISORT_EXCLUDES) .
+
+# Basic lint target (extend with flake8/black later if you like)
+lint: isort_dry_run
+	@echo "Linting complete (isort only for now)."
+
+# --------------------------------------------------------------------
+# Cleaning
+# --------------------------------------------------------------------
 
 # Clean python, pytest, and coverage files
 clean:
@@ -11,53 +50,78 @@ clean:
 	find . -type d -name ".pytest_cache" -exec rm -r {} +
 	find . -type d -name "htmlcov" -exec rm -r {} +
 	find . -type f -name "*.pyc" -delete
-	find . -type f -name "*.coverage" -delete
-	echo "Cleaned __pycache__, .pytest_cache, and htmlcov directories and .pyc, .coverage files."
+	find . -type f -name ".coverage" -delete
+	@echo "Cleaned caches and bytecode."
 
-# Run unit tests
+# --------------------------------------------------------------------
+# Tests
+# --------------------------------------------------------------------
+
+# Run unit tests with Django's test runner
 test:
-	python manage.py test
+	$(MANAGE) test
 
-# Run pytest with coverage
+# Run tests with coverage + HTML report
 coverage:
 	coverage run manage.py test && \
 	coverage report && \
 	coverage html
 
+# --------------------------------------------------------------------
+# Database / Migrations
+# --------------------------------------------------------------------
+
 # Run makemigrations
 makemigrations:
-	python manage.py makemigrations
+	$(MANAGE) makemigrations
 
 # Run migrate
 migrate:
-	python manage.py migrate
+	$(MANAGE) migrate
 
 # Run makemigrations and migrate
 makemigrate: makemigrations migrate
 
+# Delete the local SQLite database
+delete_db:
+	rm -f db.sqlite3
+	@echo "Database deleted."
+
+# Delete the DB, recreate it, run migrations, and create superuser
+resetdb: delete_db
+	@echo "Database and caches cleared."
+	$(MAKE) makemigrate
+	$(MAKE) createuser
+
+# Load initial data fixtures (adjust fixture name as needed)
+seed:
+	$(MANAGE) loaddata initial_data
+
+# --------------------------------------------------------------------
+# App / Shell helpers
+# --------------------------------------------------------------------
+
 # Run the development server
 runserver:
-	python manage.py runserver
+	$(MANAGE) runserver
 
-# Create superuser from .env values
+# Convenience alias
+run: runserver
+
+# Create superuser from .env values (custom management command)
 createuser:
-	@python manage.py create_user
+	$(MANAGE) create_user
+
+# Convenience alias
+superuser: createuser
 
 # Start the Django shell
 shell:
-	python manage.py shell
+	$(MANAGE) shell
 
-# Delete the database
-delete_db:
-	rm -f db.sqlite3
-	echo "Database deleted."
-	
-# Delete the database and recreate it, add superuser
-resetdb:
-	rm -f db.sqlite3
-	echo "Database and caches cleared."
-	make makemigrate
-	make createuser
+# --------------------------------------------------------------------
+# Help
+# --------------------------------------------------------------------
 
 # Show this help
 help:
