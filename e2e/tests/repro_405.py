@@ -1,7 +1,9 @@
 # e2e/tests/repro_405.py
 import os
+import re
 from pathlib import Path
-from playwright.sync_api import sync_playwright, expect
+
+from playwright.sync_api import sync_playwright
 
 BASE_URL = os.getenv("E2E_BASE_URL", "http://localhost:8000")
 BUG_PATH = os.getenv(
@@ -17,50 +19,49 @@ ARTIFACTS.mkdir(parents=True, exist_ok=True)
 def login(page):
     page.goto(f"{BASE_URL.rstrip('/')}/accounts/login/", wait_until="domcontentloaded")
 
-    # Try common Django field names; adjust if your template uses different names/ids
+    # Fill username
     if page.locator("input[name='username']").count():
         page.locator("input[name='username']").fill(USERNAME)
-    elif page.get_by_label("Username").count():
-        page.get_by_label("Username").fill(USERNAME)
+    elif page.get_by_label(re.compile(r"username", re.I)).count():
+        page.get_by_label(re.compile(r"username", re.I)).fill(USERNAME)
     else:
-        page.fill("input[type='text']", USERNAME)
+        page.locator("input[type='text']").first.fill(USERNAME)
 
+    # Fill password
     if page.locator("input[name='password']").count():
         page.locator("input[name='password']").fill(PASSWORD)
-    elif page.get_by_label("Password").count():
-        page.get_by_label("Password").fill(PASSWORD)
+    elif page.get_by_label(re.compile(r"password", re.I)).count():
+        page.get_by_label(re.compile(r"password", re.I)).fill(PASSWORD)
     else:
-        page.fill("input[type='password']", PASSWORD)
+        page.locator("input[type='password']").first.fill(PASSWORD)
 
-    # Submit (try a few common selectors)
-    if page.get_by_role(
-        "button", name=lambda n: "log in" in n.lower() or "sign in" in n.lower()
-    ).count():
-        page.get_by_role(
-            "button", name=lambda n: "log in" in n.lower() or "sign in" in n.lower()
-        ).click()
+    # Submit the form
+    login_btn = page.get_by_role("button", name=re.compile(r"(log ?in|sign ?in)", re.I))
+    if login_btn.count():
+        login_btn.first.click()
     elif page.locator("input[type='submit']").count():
-        page.locator("input[type='submit']").click()
+        page.locator("input[type='submit']").first.click()
     else:
         page.press("form", "Enter")
 
-    # Sanity: you should be redirected to a logged-in page and get a session cookie
+    # Confirm session established
     page.wait_for_load_state("networkidle")
+    cookies = page.context.cookies()
     assert any(
-        c["name"] == "sessionid" for c in page.context.cookies()
+        c.get("name") == "sessionid" for c in cookies
     ), "No Django session cookie after login"
 
 
 def main():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=True)  # set False to watch it
         context = browser.new_context(
             record_video_dir=str(ARTIFACTS),
             record_har_path=str(ARTIFACTS / "network.har"),
         )
         page = context.new_page()
 
-        # Log 4xx/5xx to console so we catch the 405 in terminal output too
+        # Log 4xx/5xx to the console (helps prove the 405)
         page.on(
             "response",
             lambda r: r.status >= 400
@@ -70,19 +71,19 @@ def main():
         # 1) Log in
         login(page)
 
-        # 2) Navigate to the route that requires auth (e.g., logout)
+        # 2) Go to the offending route (e.g., logout)
         page.goto(f"{BASE_URL.rstrip('/')}{BUG_PATH}", wait_until="load")
 
-        # 3) Confirm we actually saw a 405 somewhere (page load or subrequest)
+        # 3) Confirm we actually saw a 405
         try:
-            r = page.wait_for_response(lambda resp: resp.status == 405, timeout=3000)
+            r = page.wait_for_response(lambda resp: resp.status == 405, timeout=5000)
             print(f"Confirmed 405: {r.request.method} {r.url}")
         except Exception:
             print(
-                "No 405 observed within 3s—double-check BUG_PATH or add a longer timeout."
+                "No 405 observed within 5s—double-check BUG_PATH or increase timeout."
             )
 
-        page.wait_for_timeout(1200)  # gives the video a clear end frame
+        page.wait_for_timeout(1200)
         context.close()
         browser.close()
 

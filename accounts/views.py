@@ -1,10 +1,10 @@
-from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView, UpdateView
-from django.views.generic.detail import DetailView
-from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, UpdateView
 
-from accounts.forms import CustomUserCreationForm, CustomUserChangeForm
+from accounts.forms import CustomUserChangeForm, CustomUserCreationForm
 from accounts.models import CustomUser
 from config.settings.base import THE_SITE_NAME
 

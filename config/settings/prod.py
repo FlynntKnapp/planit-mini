@@ -1,7 +1,9 @@
 # config/settings/prod.py
 import os
-from .base import *  # noqa: F403, F401
+
 from config.utils import get_database_config_variables  # if you keep that helper
+
+from .base import *  # noqa: F403, F401
 
 DEBUG = False
 

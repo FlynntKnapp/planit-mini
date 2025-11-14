@@ -1,7 +1,11 @@
 from django.urls import path
 
-from accounts.views import CustomUserSignUpView, CustomUserLoginView
-from accounts.views import CustomUserUpdateView, CustomUserDetailView
+from accounts.views import (
+    CustomUserDetailView,
+    CustomUserLoginView,
+    CustomUserSignUpView,
+    CustomUserUpdateView,
+)
 
 urlpatterns = [
     # Try to override 'login' view.
