@@ -1,5 +1,7 @@
 # Django Starter with CustomUser, Django Documentation Generator, DEV-PROD settings, pipenv, and Heroku Procfile
 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/FlynntKnapp/planit-mini/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/FlynntKnapp/planit-mini/tree/main)
+
 * NOTE: Author is using PowerShell for this guide.
 
 ## Features
