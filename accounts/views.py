@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from accounts.forms import CustomUserCreationForm, CustomUserChangeForm
 from accounts.models import CustomUser
-from config.settings import THE_SITE_NAME
+from config.settings.base import THE_SITE_NAME
 
 
 class CustomUserSignUpView(CreateView):
