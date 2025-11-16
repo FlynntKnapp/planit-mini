@@ -27,7 +27,9 @@ INSTALLED_APPS = [
     "storages",
     "base",
     "django_celery_beat",
-    # your domain apps will be added as you build: assets, work, etc.
+    "assets.apps.AssetsConfig",
+    "core.apps.CoreConfig",
+    "work.apps.WorkConfig",
 ]
 
 MIDDLEWARE = [
