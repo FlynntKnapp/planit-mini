@@ -6,6 +6,7 @@
 PYTHON := python
 MANAGE := $(PYTHON) manage.py
 ISORT  := isort
+PYTEST := pytest
 
 # Common isort exclusions: venvs, git, node_modules, Django migrations, etc.
 ISORT_EXCLUDES := \
@@ -57,15 +58,17 @@ clean:
 # Tests
 # --------------------------------------------------------------------
 
-# Run unit tests with Django's test runner
+# Run tests with pytest (will pick up Django TestCase classes too)
 test:
-	$(MANAGE) test
+	$(PYTEST)
 
-# Run tests with coverage + HTML report
+# Run tests with coverage (focused on accounts for now)
 coverage:
-	coverage run manage.py test && \
-	coverage report && \
-	coverage html
+	$(PYTEST) \
+		--cov=accounts \
+		--cov-report=term-missing \
+		--cov-report=html \
+		--cov-fail-under=80
 
 # --------------------------------------------------------------------
 # Database / Migrations

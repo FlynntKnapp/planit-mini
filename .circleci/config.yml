@@ -30,15 +30,14 @@ jobs:
           command: |
             pipenv run flake8 .
 
-      # Step 5: Run tests (accounts only) with coverage
+      # Step 5: Run pytest with coverage (accounts-focused for now)
       - run:
-          name: Run Django tests for accounts app with coverage
+          name: Run pytest with coverage for accounts app
           command: |
-            pipenv run coverage run \
-              --source='accounts' \
-              --omit="*/asgi.py,*/wsgi.py,*/manage.py,*/config/settings/*" \
-              ./manage.py test accounts
-            pipenv run coverage report --fail-under=80
+            pipenv run pytest \
+              --cov=accounts \
+              --cov-report=term-missing \
+              --cov-fail-under=80
 
 workflows:
   version: 2
