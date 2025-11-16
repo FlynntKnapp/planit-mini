@@ -30,12 +30,15 @@ jobs:
           command: |
             pipenv run flake8 .
 
-      # Step 5: Run pytest with coverage (accounts-focused for now)
+      # Step 5: Run pytest with coverage
       - run:
-          name: Run pytest with coverage for accounts app
+          name: Run pytest with coverage
           command: |
             pipenv run pytest \
               --cov=accounts \
+              --cov=assets \
+              --cov=core \
+              --cov=work \
               --cov-report=term-missing \
               --cov-fail-under=80
 
