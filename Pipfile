@@ -21,6 +21,8 @@ django-storages = "*"
 django-celery-beat = "*"
 
 [dev-packages]
+pytest-django = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.12"
