@@ -34,7 +34,7 @@
 * [x] **Precommit/linting**: `.flake8` already in repo (add `ruff`, `black`, `isort` via pre-commit).
 * [x] **Procfile** present for Heroku.
 * [x] **License** present (GPL-3.0).
-* [ ] **CircleCI**: confirm `.circleci/config.yml`; add if missing (see Sprint 6).
+* [x] **CircleCI**: confirm `.circleci/config.yml`; add if missing (see Sprint 6).
 
 **Files to add now**
 ```
