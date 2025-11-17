@@ -28,6 +28,9 @@ class MaintenanceTaskAdmin(admin.ModelAdmin):
     ordering = ("workspace", "name")
     inlines = [WorkOrderInline]
 
+    # Light audit-ish: show primary key as readonly
+    readonly_fields = ("id",)
+
 
 @admin.register(WorkOrder)
 class WorkOrderAdmin(admin.ModelAdmin):
@@ -59,7 +62,37 @@ class WorkOrderAdmin(admin.ModelAdmin):
         "requested_by",
     )
     ordering = ("workspace", "due")
-    inlines = [ActivityInstanceInline]
+
+    # Light audit-ish: show primary key as readonly
+    readonly_fields = ("id",)
+
+    # Bulk status actions
+    actions = (
+        "mark_open",
+        "mark_done",
+        "mark_cancelled",
+    )
+
+    @admin.action(description="Mark selected work orders as Open")
+    def mark_open(self, request, queryset):
+        """
+        Bulk action: set status='open' for selected work orders.
+        """
+        queryset.update(status="open")
+
+    @admin.action(description="Mark selected work orders as Done")
+    def mark_done(self, request, queryset):
+        """
+        Bulk action: set status='done' for selected work orders.
+        """
+        queryset.update(status="done")
+
+    @admin.action(description="Mark selected work orders as Cancelled")
+    def mark_cancelled(self, request, queryset):
+        """
+        Bulk action: set status='cancelled' for selected work orders.
+        """
+        queryset.update(status="cancelled")
 
 
 @admin.register(ActivityInstance)
@@ -90,3 +123,6 @@ class ActivityInstanceAdmin(admin.ModelAdmin):
         "performed_by",
     )
     ordering = ("-occurred_at",)
+
+    # Light audit-ish: show primary key as readonly
+    readonly_fields = ("id",)

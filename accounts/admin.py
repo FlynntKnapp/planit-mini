@@ -13,6 +13,9 @@ class CustomUserAdmin(UserAdmin):
     form = CustomUserChangeForm
     model = CustomUser
 
+    # Audit-ish: make the primary key readonly in the admin UI.
+    readonly_fields = UserAdmin.readonly_fields + ("id",)
+
     list_display = (
         "username",
         "email",
@@ -30,32 +33,45 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ("username", "email", "first_name", "last_name")
     ordering = ("username",)
 
+    # Bulk actions for moderator/admin workflow
+    actions = (
+        "mark_registration_accepted",
+        "mark_registration_unaccepted",
+    )
+
+    @admin.action(description="Mark selected users as registration accepted")
+    def mark_registration_accepted(self, request, queryset):
+        """
+        Bulk action: set registration_accepted=True for selected users.
+        """
+        queryset.update(registration_accepted=True)
+
+    @admin.action(description="Mark selected users as registration NOT accepted")
+    def mark_registration_unaccepted(self, request, queryset):
+        """
+        Bulk action: set registration_accepted=False for selected users.
+        """
+        queryset.update(registration_accepted=False)
+
     def get_fieldsets(self, request, obj=None):
         """
         Override `get_fieldsets()` to add `registration_accepted` to a
-        'Moderator Permissions' section on the **change view** only.
-
-        For the add view (obj is None), we just return the base fieldsets
-        (which come from UserAdmin and/or `add_fieldsets`) unchanged.
+        'Moderator Permissions' section on the change view.
         """
-        # Let UserAdmin decide the base fieldsets (add vs change behavior)
         fieldsets = super().get_fieldsets(request, obj)
         fieldsets_as_list = list(fieldsets)
 
-        # Only inject the extra section on the change view
-        if obj is not None:
-            moderator_permissions = (
-                "Moderator Permissions",
-                {"fields": ("registration_accepted",)},
-            )
+        moderator_permissions = (
+            "Moderator Permissions",
+            {"fields": ("registration_accepted",)},
+        )
 
-            # Insert after "Personal info" (index 1) if present, else near top
-            insert_index = 2 if len(fieldsets_as_list) >= 2 else 1
-            fieldsets_as_list.insert(insert_index, moderator_permissions)
-
+        # Insert after "Personal info" (index 1) if present, else near top.
+        insert_index = 2 if len(fieldsets_as_list) >= 2 else 1
+        fieldsets_as_list.insert(insert_index, moderator_permissions)
         return fieldsets_as_list
 
-    # Optionally show `registration_accepted` when creating users as well
+    # Show registration_accepted on the add form as well
     add_fieldsets = (
         (
             None,

@@ -1,5 +1,6 @@
 import pytest
 from django.contrib import admin as dj_admin
+from django.utils import timezone
 
 from work.admin import (
     ActivityInstanceAdmin,
@@ -9,6 +10,8 @@ from work.admin import (
     WorkOrderInline,
 )
 from work.models import ActivityInstance, MaintenanceTask, WorkOrder
+from core.models import Workspace
+from assets.models import Asset
 
 
 @pytest.mark.parametrize(
@@ -50,7 +53,10 @@ def test_maintenance_task_admin_configuration():
 
     assert ma.raw_id_fields == ("workspace",)
     assert ma.ordering == ("workspace", "name")
+    # Inline: WorkOrderInline should be attached here (not on WorkOrderAdmin)
     assert WorkOrderInline in ma.inlines
+    # readonly id field
+    assert "id" in ma.readonly_fields
 
 
 def test_work_order_admin_configuration():
@@ -95,7 +101,14 @@ def test_work_order_admin_configuration():
         "requested_by",
     )
     assert ma.ordering == ("workspace", "due")
-    assert ActivityInstanceInline in ma.inlines
+
+    # There are no inlines defined on WorkOrderAdmin now
+    assert getattr(ma, "inlines", ()) == ()
+
+    # Actions and readonly id field
+    action_names = set(ma.actions)
+    assert {"mark_open", "mark_done", "mark_cancelled"} <= action_names
+    assert "id" in ma.readonly_fields
 
 
 def test_activity_instance_admin_configuration():
@@ -137,3 +150,94 @@ def test_activity_instance_admin_configuration():
         "performed_by",
     )
     assert ma.ordering == ("-occurred_at",)
+    assert "id" in ma.readonly_fields
+
+
+# --- Action behaviour tests -------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_mark_open_action():
+    """
+    mark_open should set status='open' for all work orders in the queryset.
+    """
+    workspace = Workspace.objects.create(name="WS", slug="ws")
+    asset = Asset.objects.create(workspace=workspace, name="Asset 1", kind="PI")
+    task = MaintenanceTask.objects.create(
+        workspace=workspace,
+        name="Task 1",
+        cadence="monthly",
+    )
+    order = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=timezone.now(),
+        status="done",
+    )
+
+    ma = WorkOrderAdmin(WorkOrder, dj_admin.site)
+    qs = WorkOrder.objects.filter(pk=order.pk)
+
+    ma.mark_open(request=None, queryset=qs)
+
+    order.refresh_from_db()
+    assert order.status == "open"
+
+
+@pytest.mark.django_db
+def test_mark_done_action():
+    """
+    mark_done should set status='done' for all work orders in the queryset.
+    """
+    workspace = Workspace.objects.create(name="WS2", slug="ws2")
+    asset = Asset.objects.create(workspace=workspace, name="Asset 2", kind="PI")
+    task = MaintenanceTask.objects.create(
+        workspace=workspace,
+        name="Task 2",
+        cadence="weekly",
+    )
+    order = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=timezone.now(),
+        status="open",
+    )
+
+    ma = WorkOrderAdmin(WorkOrder, dj_admin.site)
+    qs = WorkOrder.objects.filter(pk=order.pk)
+
+    ma.mark_done(request=None, queryset=qs)
+
+    order.refresh_from_db()
+    assert order.status == "done"
+
+
+@pytest.mark.django_db
+def test_mark_cancelled_action():
+    """
+    mark_cancelled should set status='cancelled' for all work orders in the queryset.
+    """
+    workspace = Workspace.objects.create(name="WS3", slug="ws3")
+    asset = Asset.objects.create(workspace=workspace, name="Asset 3", kind="PI")
+    task = MaintenanceTask.objects.create(
+        workspace=workspace,
+        name="Task 3",
+        cadence="weekly",
+    )
+    order = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=timezone.now(),
+        status="open",
+    )
+
+    ma = WorkOrderAdmin(WorkOrder, dj_admin.site)
+    qs = WorkOrder.objects.filter(pk=order.pk)
+
+    ma.mark_cancelled(request=None, queryset=qs)
+
+    order.refresh_from_db()
+    assert order.status == "cancelled"

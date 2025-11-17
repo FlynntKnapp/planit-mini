@@ -113,3 +113,57 @@ def test_add_fieldsets_includes_registration_accepted():
     _, add_options = add_fieldsets[0]
     fields = add_options.get("fields", ())
     assert "registration_accepted" in fields
+
+
+def test_readonly_fields_include_id(custom_user_admin):
+    """
+    CustomUserAdmin.readonly_fields should include the 'id' audit field.
+    """
+    assert "id" in custom_user_admin.readonly_fields
+
+
+def test_actions_include_registration_actions(custom_user_admin):
+    """
+    Ensure the bulk registration actions are wired up.
+    """
+    action_names = set(custom_user_admin.actions)
+    assert "mark_registration_accepted" in action_names
+    assert "mark_registration_unaccepted" in action_names
+
+
+@pytest.mark.django_db
+def test_mark_registration_accepted_action(custom_user_admin):
+    """
+    mark_registration_accepted should set registration_accepted=True
+    for all users in the queryset.
+    """
+    user = CustomUser.objects.create_user(
+        username="user_accept",
+        password="dummy",
+        registration_accepted=False,
+    )
+
+    qs = CustomUser.objects.filter(pk=user.pk)
+    custom_user_admin.mark_registration_accepted(request=None, queryset=qs)
+
+    user.refresh_from_db()
+    assert user.registration_accepted is True
+
+
+@pytest.mark.django_db
+def test_mark_registration_unaccepted_action(custom_user_admin):
+    """
+    mark_registration_unaccepted should set registration_accepted=False
+    for all users in the queryset.
+    """
+    user = CustomUser.objects.create_user(
+        username="user_unaccept",
+        password="dummy",
+        registration_accepted=True,
+    )
+
+    qs = CustomUser.objects.filter(pk=user.pk)
+    custom_user_admin.mark_registration_unaccepted(request=None, queryset=qs)
+
+    user.refresh_from_db()
+    assert user.registration_accepted is False
