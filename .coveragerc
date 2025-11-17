@@ -1,0 +1,16 @@
+# .coveragerc
+[run]
+branch = True
+source =
+    accounts
+    assets
+    config
+    core
+    work
+
+omit =
+    */migrations/*
+    */tests/*
+    manage.py
+    config/settings/*
+    */__init__.py

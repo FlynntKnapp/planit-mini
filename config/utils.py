@@ -1,36 +1,38 @@
 # config/utils.py
 
+from urllib.parse import parse_qs, unquote, urlparse
 
-def get_database_config_variables(url):
-    """
-    Parse the Heroku `DATABASE_URL` into a dictionary.
-    """
-    # Remove the `postgres://` from the beginning of the string
-    url = url.split("://")[1]
-    # Split the remaining string into a list on the `@` character, which
-    # separates the database credentials from the host info
-    credentials_and_host_info = url.split("@")
-    # Get the database credentials (`DATABASE_USER` and `DATABASE_PASSWORD`)
-    # from the first item in the `credentials_and_host_info` list
-    credentials = credentials_and_host_info[0].split(":")
-    # Get the database `host_info` from the second item in the
-    # `credentials_and_host_info` list, which is the `DATABASE_HOST`,
-    # `DATABASE_PORT`, and `DATABASE_NAME`
-    host_info = credentials_and_host_info[1].split(":")
-    # Get the database host from the first item in the `host_info` list
-    host = host_info[0]
-    # Get the database port and name from the second item in the
-    # `host_info` list
-    port_and_name = host_info[1].split("/")
-    # Get the database port from the first item in the `port_and_name` list
-    port = port_and_name[0]
-    # Get the database name from the second item in the `port_and_name` list
-    name = port_and_name[1]
-    # Return a dictionary with the database credentials and host info
+
+def get_database_config_variables(url: str) -> dict:
+    if not url:
+        raise ValueError("DATABASE_URL environment variable must be set")
+
+    parsed = urlparse(url)
+
+    if not parsed.scheme or not parsed.hostname or not parsed.path:
+        raise ValueError(f"Invalid DATABASE_URL: {url!r}")
+
+    # Handle both postgres:// and postgresql://
+    if parsed.scheme not in ("postgres", "postgresql"):
+        raise ValueError(
+            f"Unsupported database scheme in DATABASE_URL: {parsed.scheme!r}"
+        )
+
+    # Path is like "/dbname"
+    db_name = parsed.path.lstrip("/") or None
+
+    # Password & user may be percent-encoded
+    username = unquote(parsed.username) if parsed.username else ""
+    password = unquote(parsed.password) if parsed.password else ""
+
+    # Optional connection options (?sslmode=require, etc.)
+    query_params = parse_qs(parsed.query)
+
     return {
-        "DATABASE_USER": credentials[0],
-        "DATABASE_PASSWORD": credentials[1],
-        "DATABASE_HOST": host,
-        "DATABASE_PORT": port,
-        "DATABASE_NAME": name,
+        "DATABASE_USER": username,
+        "DATABASE_PASSWORD": password,
+        "DATABASE_HOST": parsed.hostname,
+        "DATABASE_PORT": str(parsed.port or ""),  # optionally default to 5432
+        "DATABASE_NAME": db_name,
+        "OPTIONS": query_params,  # you can map sslmode etc into DATABASES['OPTIONS']
     }

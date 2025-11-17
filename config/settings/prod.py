@@ -1,7 +1,8 @@
 # config/settings/prod.py
+
 import os
 
-from config.utils import get_database_config_variables  # if you keep that helper
+from config.utils import get_database_config_variables
 
 from .base import *  # noqa: F403, F401
 
@@ -39,9 +40,15 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": database_config_variables["DATABASE_NAME"],
         "HOST": database_config_variables["DATABASE_HOST"],
-        "PORT": database_config_variables["DATABASE_PORT"],
+        "PORT": database_config_variables["DATABASE_PORT"] or "5432",
         "USER": database_config_variables["DATABASE_USER"],
         "PASSWORD": database_config_variables["DATABASE_PASSWORD"],
+        # Optional: map sslmode into OPTIONS
+        "OPTIONS": {
+            "sslmode": database_config_variables["OPTIONS"].get("sslmode", ["prefer"])[
+                0
+            ],
+        },
     }
 }
 
