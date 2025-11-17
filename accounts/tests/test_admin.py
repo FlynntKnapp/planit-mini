@@ -1,126 +1,115 @@
-from django.test import TestCase
+import pytest
+from django.contrib import admin as dj_admin
 
 from accounts.admin import CustomUserAdmin
 from accounts.forms import CustomUserChangeForm, CustomUserCreationForm
 from accounts.models import CustomUser
 
 
-class TestCustomUserAdmin(TestCase):
+@pytest.fixture
+def custom_user_admin():
     """
-    Inherit from `django.test.TestCase` to access `self.client` and
-    `self.assert*` methods. `self` will be an instance of `django.test.TestCase`
-    and `django.test.TestCase` inherits from `unittest.TestCase`.
+    Instantiate CustomUserAdmin once and reuse it in tests.
     """
+    return CustomUserAdmin(CustomUser, dj_admin.site)
 
-    @classmethod
-    def setUpTestData(cls):
-        """
-        Set up non-modified objects used by all test methods.
 
-        This specific function name `setUpTestData` is required by Django.
-        """
-        cls.user = CustomUser.objects.create_user(
-            username="DezziKitten",
-            password="MeowMeow42",
-        )
+def test_uses_correct_add_form(custom_user_admin):
+    """
+    CustomUserAdmin.add_form should be CustomUserCreationForm.
+    """
+    assert custom_user_admin.add_form is CustomUserCreationForm
 
-    def test_uses_correct_add_form(self):
-        """
-        `CustomUserAdmin` `add_form` should be `CustomUserCreationForm`.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        self.assertEqual(custom_user_admin.add_form, CustomUserCreationForm)
 
-    def test_uses_correct_change_form(self):
-        """
-        `CustomUserAdmin` `form` should be `CustomUserChangeForm`.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        self.assertEqual(custom_user_admin.form, CustomUserChangeForm)
+def test_uses_correct_change_form(custom_user_admin):
+    """
+    CustomUserAdmin.form should be CustomUserChangeForm.
+    """
+    assert custom_user_admin.form is CustomUserChangeForm
 
-    def test_uses_correct_model(self):
-        """
-        `CustomUserAdmin` `model` should be `CustomUser`.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        self.assertEqual(custom_user_admin.model, CustomUser)
 
-    def test_list_display_has_correct_fields_as_tuple(self):
-        """
-        `CustomUserAdmin` `list_display` should be a tuple.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        self.assertIsInstance(custom_user_admin.list_display, tuple)
-        expected_tuple = (
-            "username",
-            "email",
-            "registration_accepted",
-            "is_staff",
-        )
-        self.assertEqual(custom_user_admin.list_display, expected_tuple)
+def test_uses_correct_model(custom_user_admin):
+    """
+    CustomUserAdmin.model should be CustomUser.
+    """
+    assert custom_user_admin.model is CustomUser
 
-    # Here, we show another way to test the parts of `CustomUserAdmin.list_display`
-    # below.
-    def test_list_display_includes_username(self):
-        """
-        `CustomUserAdmin` `list_display` should include `username`.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        self.assertIn("username", custom_user_admin.list_display)
 
-    def test_list_display_includes_email(self):
-        """
-        `CustomUserAdmin` `list_display` should include `email`.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        self.assertIn("email", custom_user_admin.list_display)
+def test_list_display_exact_fields(custom_user_admin):
+    """
+    CustomUserAdmin.list_display should match the expected tuple, including
+    the new is_superuser column.
+    """
+    expected = (
+        "username",
+        "email",
+        "registration_accepted",
+        "is_staff",
+        "is_superuser",
+    )
+    assert custom_user_admin.list_display == expected
 
-    def test_list_display_includes_registration_accepted(self):
-        """
-        `CustomUserAdmin` `list_display` should include `registration_accepted`.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        self.assertIn("registration_accepted", custom_user_admin.list_display)
 
-    def test_list_display_includes_is_staff(self):
-        """
-        `CustomUserAdmin` `list_display` should include `is_staff`.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        self.assertIn("is_staff", custom_user_admin.list_display)
+def test_list_filter_includes_registration_accepted_and_permissions(custom_user_admin):
+    """
+    Ensure list_filter includes the key filters we care about.
+    """
+    for field in ("registration_accepted", "is_staff", "is_superuser", "is_active"):
+        assert field in custom_user_admin.list_filter
 
-    def test_get_fieldsets_is_list_of_tuples(self):
-        """
-        `CustomUserAdmin` `get_fieldsets()` method should return a list of tuples.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        fieldsets = custom_user_admin.get_fieldsets(request=None, obj=None)
-        self.assertIsInstance(fieldsets, list)
-        self.assertIsInstance(fieldsets[0], tuple)
 
-    def test_get_fieldsets_has_moderator_permissions_in_second_element(self):
-        """
-        `CustomUserAdmin` `get_fieldsets()` method should return a list of tuples that
-        includes `Moderator Permissions`.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        fieldsets = custom_user_admin.get_fieldsets(request=None, obj=None)
-        fieldsets_as_list = list(fieldsets)
-        self.assertIn("Moderator Permissions", fieldsets_as_list[1])
+def test_search_fields_and_ordering(custom_user_admin):
+    """
+    Verify search_fields and ordering have been customized.
+    """
+    assert custom_user_admin.search_fields == (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+    )
+    assert custom_user_admin.ordering == ("username",)
 
-    def test_get_fieldsets_moderator_permissions_tuple(self):
-        """
-        `CustomUserAdmin` `get_fieldsets()` method should return a list of tuples that
-        includes `Moderator Permissions` as a tuple.
-        """
-        custom_user_admin = CustomUserAdmin(CustomUser, None)
-        expected_moderator_permissions_tuple = (
-            "Moderator Permissions",
-            {"fields": ("registration_accepted",)},
-        )
-        fieldsets = custom_user_admin.get_fieldsets(request=None, obj=None)
-        fieldsets_as_list = list(fieldsets)
-        self.assertEqual(
-            fieldsets_as_list[1],
-            expected_moderator_permissions_tuple,
-        )
+
+def test_get_fieldsets_returns_list_of_tuples(custom_user_admin):
+    """
+    CustomUserAdmin.get_fieldsets() should return a list of tuples.
+    We call with obj=None (add view) and still expect a list-of-tuples.
+    """
+    fieldsets = custom_user_admin.get_fieldsets(request=None, obj=None)
+    assert isinstance(fieldsets, list)
+    assert fieldsets
+    assert isinstance(fieldsets[0], tuple)
+
+
+def test_get_fieldsets_includes_moderator_permissions_section(custom_user_admin):
+    """
+    Ensure 'Moderator Permissions' section with registration_accepted is
+    inserted at the correct position (index 2) on the change view.
+    """
+    # Simulate change view by passing an object instance
+    obj = CustomUser()
+    fieldsets = custom_user_admin.get_fieldsets(request=None, obj=obj)
+    fieldsets_as_list = list(fieldsets)
+
+    # There should be at least three fieldsets now
+    assert len(fieldsets_as_list) >= 3
+
+    # "Moderator Permissions" should be the third fieldset (index 2)
+    label, options = fieldsets_as_list[2]
+    assert label == "Moderator Permissions"
+    assert "fields" in options
+    assert options["fields"] == ("registration_accepted",)
+
+
+def test_add_fieldsets_includes_registration_accepted():
+    """
+    Ensure registration_accepted is also present on the add user form.
+    """
+    add_fieldsets = CustomUserAdmin.add_fieldsets
+    assert isinstance(add_fieldsets, tuple)
+    assert add_fieldsets
+
+    _, add_options = add_fieldsets[0]
+    fields = add_options.get("fields", ())
+    assert "registration_accepted" in fields
