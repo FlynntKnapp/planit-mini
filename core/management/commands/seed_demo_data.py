@@ -292,6 +292,39 @@ class Command(BaseCommand):
             asset.applications.set(app_objs)
             assets[data["name"]] = asset
 
+        # --- NEW: Warranty / purchase dates to demonstrate AssetAdmin chips ---
+        today = timezone.now().date()
+        warranty_config = {
+            # Expired warranty
+            "RPi4 Monitoring Node": {
+                "purchase_date": today - timedelta(days=365),
+                "warranty_expires": today - timedelta(days=10),
+            },
+            # Expiring soon (within 30 days)
+            "Backup Server": {
+                "purchase_date": today - timedelta(days=200),
+                "warranty_expires": today + timedelta(days=5),
+            },
+            # Active (far in the future)
+            "Proxmox Host": {
+                "purchase_date": today - timedelta(days=90),
+                "warranty_expires": today + timedelta(days=120),
+            },
+            # No warranty end date: shows 'n/a', but has purchase date
+            "Tiny Dev Laptop": {
+                "purchase_date": today - timedelta(days=400),
+                "warranty_expires": None,
+            },
+        }
+
+        for asset_name, cfg in warranty_config.items():
+            asset = assets.get(asset_name)
+            if not asset:
+                continue
+            asset.purchase_date = cfg["purchase_date"]
+            asset.warranty_expires = cfg["warranty_expires"]
+            asset.save()
+
         # --- MaintenanceTask (5–10 items total) ---
         tasks_data = [
             {
@@ -398,6 +431,41 @@ class Command(BaseCommand):
             },
         ]
 
+        # --- NEW: Extra WorkOrders to demonstrate DueWindowFilter + next_due_status ---
+        extra_workorders = [
+            # Overdue (due in the past)
+            {
+                "workspace_slug": "home-lab",
+                "asset_name": "Backup Server",
+                "task_name": "Check backups",
+                "due_delta_days": -2,  # Overdue
+                "status": "open",
+                "assigned_to": "alice",
+                "requested_by": "tiny",
+            },
+            # Due today
+            {
+                "workspace_slug": "home-lab",
+                "asset_name": "RPi4 Monitoring Node",
+                "task_name": "Apply OS updates",
+                "due_delta_days": 0,  # Due today
+                "status": "open",
+                "assigned_to": "tiny",
+                "requested_by": "alice",
+            },
+            # Far future (future window in filter)
+            {
+                "workspace_slug": "laptop-fleet",
+                "asset_name": "Tiny Dev Laptop",
+                "task_name": "Laptop patching",
+                "due_delta_days": 45,  # >= 30 days, "future" bucket
+                "status": "open",
+                "assigned_to": "tiny",
+                "requested_by": "bob",
+            },
+        ]
+        workorders_data.extend(extra_workorders)
+
         workorders = {}
         for idx, data in enumerate(workorders_data, start=1):
             ws = workspaces[data["workspace_slug"]]
@@ -476,6 +544,16 @@ class Command(BaseCommand):
                 "note": "Checked WAL archiving and backup status.",
                 "performed_by": "tiny",
                 "occurred_delta_hours": -2,
+            },
+            # NEW: a second activity on the same asset/work order to show recent-first ordering  # noqa:E501
+            {
+                "workspace_slug": "home-lab",
+                "workorder_idx": 1,
+                "asset_name": "RPi4 Monitoring Node",
+                "kind": "checked",
+                "note": "Quick follow-up check on monitoring node.",
+                "performed_by": "tiny",
+                "occurred_delta_hours": -1,  # more recent than the first
             },
         ]
 
