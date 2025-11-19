@@ -64,10 +64,10 @@ config/**init**.py # celery loader
 - [x] `ActivityInstance(work_order=FK null, asset=FK, kind=choices[checked,patched,backup_verified], note, occurred_at=DateTime)`
 
 **Admin polish**
-- [ ] `AssetAdmin`: `list_display` (warranty/due status chips), `search_fields`, `list_filter` (form_factor, os, apps)
-- [ ] Inlines: `WorkOrder` & recent `ActivityInstance` on `Asset`
-- [ ] `WorkOrderAdmin`: quick actions “Mark done”, filter by `due` window
-- [ ] `MaintenanceTaskAdmin`: show cadence, “Generate Preview” action
+- [x] `AssetAdmin`: `list_display` (warranty/due status chips), `search_fields`, `list_filter` (form_factor, os, apps)
+- [x] Inlines: `WorkOrder` & recent `ActivityInstance` on `Asset`
+- [x] `WorkOrderAdmin`: quick actions “Mark done”, filter by `due` window
+- [x] `MaintenanceTaskAdmin`: show cadence, “Generate Preview” action
 
 **Seed command**
 - [x] `python manage.py seed_demo_data` → some form factors, OSes, apps, assets, tasks, work orders
