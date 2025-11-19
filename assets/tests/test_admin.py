@@ -54,8 +54,10 @@ def test_project_admin_configuration():
     assert ma.search_fields == ("name", "description", "slug")
     assert ma.list_filter == ("workspace",)
     assert ma.prepopulated_fields == {"slug": ("name",)}
-    assert ma.raw_id_fields == ("workspace",)
-    assert ma.ordering == ("workspace", "name")
+    # Project now uses autocomplete for workspace instead of raw ID field
+    assert ma.autocomplete_fields == ("workspace",)
+    # No explicit raw_id_fields configured
+    assert ma.raw_id_fields == ()
 
 
 def test_asset_admin_configuration():
@@ -72,10 +74,10 @@ def test_asset_admin_configuration():
         "purchase_date",
         "warranty_expires",
     )
-    assert "workspace" in ma.list_filter
-    assert "kind" in ma.list_filter
-    assert "form_factor" in ma.list_filter
-    assert "os" in ma.list_filter
+
+    # Key filters still present
+    for field in ("workspace", "kind", "form_factor", "os"):
+        assert field in ma.list_filter
 
     # Ensure we can search by related names and notes
     for field in (
@@ -87,8 +89,17 @@ def test_asset_admin_configuration():
     ):
         assert field in ma.search_fields
 
-    assert ma.raw_id_fields == ("workspace", "project", "form_factor", "os")
-    assert ma.filter_horizontal == ("applications",)
+    # Asset now uses autocomplete for these relations (no raw_id_fields)
+    assert ma.autocomplete_fields == (
+        "workspace",
+        "project",
+        "form_factor",
+        "os",
+        "applications",
+    )
+    # filter_horizontal removed when switching applications to autocomplete
+    assert ma.filter_horizontal == ()
+
     assert ma.date_hierarchy == "purchase_date"
     assert ma.list_select_related == ("workspace", "project", "form_factor", "os")
     assert ma.ordering == ("workspace", "name")

@@ -25,11 +25,13 @@ def test_workspace_admin_configuration():
 
 def test_membership_inline_configuration():
     inline = MembershipInline(Workspace, dj_admin.site)
-    # Check basic attributes of inline
+
     assert inline.model is Membership
     assert inline.extra == 1
-    assert inline.raw_id_fields == ("user",)
+    # Inline now uses autocomplete for user only
     assert inline.autocomplete_fields == ("user",)
+    # No raw_id_fields explicitly configured
+    assert inline.raw_id_fields == ()
 
 
 def test_membership_admin_configuration():
@@ -45,5 +47,7 @@ def test_membership_admin_configuration():
     ):
         assert field in ma.search_fields
 
-    assert ma.raw_id_fields == ("user", "workspace")
+    # Membership admin now uses autocomplete, not raw_id_fields
+    assert ma.autocomplete_fields == ("user", "workspace")
+    assert ma.raw_id_fields == ()
     assert ma.ordering == ("workspace", "user")
