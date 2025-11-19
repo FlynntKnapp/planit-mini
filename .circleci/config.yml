@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 jobs:
   build_and_test:
@@ -42,8 +42,29 @@ jobs:
               --cov-report=term-missing \
               --cov-fail-under=80
 
+  deploy:
+    docker:
+      - image: cimg/python:3.12
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: Deploy main to Heroku
+          command: |
+            # HEROKU_APP_NAME and HEROKU_API_KEY are set in CircleCI project settings.
+            git push https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git main
+
 workflows:
   version: 2
-  test_pipeline:
+  test_and_deploy:
     jobs:
       - build_and_test
+      - deploy:
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              only: main
