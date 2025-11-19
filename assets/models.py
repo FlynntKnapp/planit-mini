@@ -15,6 +15,9 @@ class OS(models.Model):
     version = models.CharField(max_length=40, blank=True)
     slug = models.SlugField(unique=True)
 
+    class Meta:
+        verbose_name_plural = "Operating Systems"
+
 
 class Application(models.Model):
     name = models.CharField(max_length=120)
