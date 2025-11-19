@@ -14,3 +14,5 @@ omit =
     manage.py
     config/settings/*
     */__init__.py
+    */seed_demo_data.py
+    seed_demo_data.py
