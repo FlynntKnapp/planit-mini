@@ -17,24 +17,24 @@
 
 ## Sprint 0 — Bootstrap (1–2 sessions)
 
-* [x] **Create repo** `planit-mini`.  
+- [x] **Create repo** `planit-mini`.  
   * Generated from `DjangoStarter-heroku` for a clean base.
-* [x] **Python env**: **Pipenv** (Pipfile) included by template.
-* [x] **Django project** exists (`config/`, `manage.py`).
-* [x] **Apps**: add `core`, `assets`, `work`  
+- [x] **Python env**: **Pipenv** (Pipfile) included by template.
+- [x] **Django project** exists (`config/`, `manage.py`).
+- [x] **Apps**: add `core`, `assets`, `work`  
   - `python manage.py startapp core && startapp assets && startapp work`
-* [x] **Install base apps already present**: `accounts` custom user.
-* [x] **Settings split**: DEV/PROD present in template; keep and extend.
-* [ ] **Postgres** via `dj-database-url` (`DATABASE_URL`)
-* [ ] **Redis cache** (`REDIS_URL`) + DRF settings stub
-* [x] **Celery**: add `config/celery.py` + loader in `config/__init__.py`
-* [x] **.env.example**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DEBUG`, `ALLOWED_HOSTS`
-* [x] **Makefile**: `run`, `test`, `lint`, `migrate`, `seed`, `superuser`
-* [x] **README skeleton** present; will replace with Plan-It specifics & screenshots.
-* [x] **Precommit/linting**: `.flake8` already in repo (add `ruff`, `black`, `isort` via pre-commit).
-* [x] **Procfile** present for Heroku.
-* [x] **License** present (GPL-3.0).
-* [x] **CircleCI**: confirm `.circleci/config.yml`; add if missing (see Sprint 6).
+- [x] **Install base apps already present**: `accounts` custom user.
+- [x] **Settings split**: DEV/PROD present in template; keep and extend.
+- [ ] **Postgres** via `dj-database-url` (`DATABASE_URL`)
+- [ ] **Redis cache** (`REDIS_URL`) + DRF settings stub
+- [x] **Celery**: add `config/celery.py` + loader in `config/__init__.py`
+- [x] **.env.example**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DEBUG`, `ALLOWED_HOSTS`
+- [x] **Makefile**: `run`, `test`, `lint`, `migrate`, `seed`, `superuser`
+- [x] **README skeleton** present; will replace with Plan-It specifics & screenshots.
+- [x] **Precommit/linting**: `.flake8` already in repo (add `ruff`, `black`, `isort` via pre-commit).
+- [x] **Procfile** present for Heroku.
+- [x] **License** present (GPL-3.0).
+- [x] **CircleCI**: confirm `.circleci/config.yml`; add if missing (see Sprint 6).
 
 **Files to add now**
 ```
@@ -50,160 +50,160 @@ config/**init**.py # celery loader
 ## Sprint 1 — Data Model & Admin (Assets + Work) (1–3 sessions)
 
 **assets/models.py**
-* [ ] `FormFactor(name, slug)`  — e.g., “Raspberry Pi”, “Server”, “Laptop”
-* [ ] `OS(name, version, slug)` — e.g., “RaspiOS 64-bit”, “Ubuntu 24.04”
-* [ ] `Application(name, version, slug)`
-* [ ] `Project(name, description, slug)` — “Q1 Patch Wave”, “Lab Refresh”
-* [ ] `Asset(name, kind, form_factor=FK, os=FK, location, purchase_date?, warranty_expires?, notes)`
-* [ ] `Asset.applications` — M2M to `Application`
+- [x] `FormFactor(name, slug)`  — e.g., “Raspberry Pi”, “Server”, “Laptop”
+- [x] `OS(name, version, slug)` — e.g., “RaspiOS 64-bit”, “Ubuntu 24.04”
+- [x] `Application(name, version, slug)`
+- [x] `Project(name, description, slug)` — “Q1 Patch Wave”, “Lab Refresh”
+- [x] `Asset(name, kind, form_factor=FK, os=FK, location, purchase_date?, warranty_expires?, notes)`
+- [x] `Asset.applications` — M2M to `Application`
 
 **work/models.py**
-* [ ] `MaintenanceTask(name, cadence, description?, threshold_json?)`
+- [x] `MaintenanceTask(name, cadence, description?, threshold_json?)`
   - examples: “Monthly OS patches”, “Weekly backup verify”
-* [ ] `WorkOrder(asset=FK, task=FK, due=DateTime, status=choices[open,done,cancelled])`
-* [ ] `ActivityInstance(work_order=FK null, asset=FK, kind=choices[checked,patched,backup_verified], note, occurred_at=DateTime)`
+- [x] `WorkOrder(asset=FK, task=FK, due=DateTime, status=choices[open,done,cancelled])`
+- [x] `ActivityInstance(work_order=FK null, asset=FK, kind=choices[checked,patched,backup_verified], note, occurred_at=DateTime)`
 
 **Admin polish**
-* [ ] `AssetAdmin`: `list_display` (warranty/due status chips), `search_fields`, `list_filter` (form_factor, os, apps)
-* [ ] Inlines: `WorkOrder` & recent `ActivityInstance` on `Asset`
-* [ ] `WorkOrderAdmin`: quick actions “Mark done”, filter by `due` window
-* [ ] `MaintenanceTaskAdmin`: show cadence, “Generate Preview” action
+- [ ] `AssetAdmin`: `list_display` (warranty/due status chips), `search_fields`, `list_filter` (form_factor, os, apps)
+- [ ] Inlines: `WorkOrder` & recent `ActivityInstance` on `Asset`
+- [ ] `WorkOrderAdmin`: quick actions “Mark done”, filter by `due` window
+- [ ] `MaintenanceTaskAdmin`: show cadence, “Generate Preview” action
 
 **Seed command**
-* [ ] `python manage.py seed_demo` → some form factors, OSes, apps, assets, tasks, work orders
+- [x] `python manage.py seed_demo_data` → some form factors, OSes, apps, assets, tasks, work orders
 
 **Migrations**
-* [ ] `make migrate`
+- [x] `make migrate`
 
 ## Sprint 2 — API (DRF) (1–3 sessions)
 
 **Serializers**
-* [ ] `FormFactorSerializer`, `OSSerializer`, `ApplicationSerializer`, `ProjectSerializer`
-* [ ] `AssetSerializer` (include apps list)
-* [ ] `MaintenanceTaskSerializer`, `WorkOrderSerializer`, `ActivityInstanceSerializer`
+- [ ] `FormFactorSerializer`, `OSSerializer`, `ApplicationSerializer`, `ProjectSerializer`
+- [ ] `AssetSerializer` (include apps list)
+- [ ] `MaintenanceTaskSerializer`, `WorkOrderSerializer`, `ActivityInstanceSerializer`
 
 **Viewsets + Router**
-* [ ] ModelViewSets for all models, registered on `/api/...`
+- [ ] ModelViewSets for all models, registered on `/api/...`
 
 **Permissions**
-* [ ] Read: authenticated users
-* [ ] Write: users in `maintenance_manager` group
-* [ ] Object-level (optional): owners/managers for changes
+- [ ] Read: authenticated users
+- [ ] Write: users in `maintenance_manager` group
+- [ ] Object-level (optional): owners/managers for changes
 
 **Pagination/Filters/Ordering**
-* [ ] Default `PageNumberPagination` (20)
-* [ ] Filters:
+- [ ] Default `PageNumberPagination` (20)
+- [ ] Filters:
   - `Asset`: by `form_factor`, `os`, `applications`, `location`, `warranty_expires__lt`, `name__icontains`
   - `WorkOrder`: by `asset`, `task`, `status`, `due__date` range
   - `ActivityInstance`: by `asset`, `kind`, `occurred_at` range
-* [ ] Ordering: `?ordering=name` (Assets) / `?ordering=-due` (WorkOrders) / `?ordering=-occurred_at` (Activities)
-* [ ] Throttling: simple user throttle for non-staff
+- [ ] Ordering: `?ordering=name` (Assets) / `?ordering=-due` (WorkOrders) / `?ordering=-occurred_at` (Activities)
+- [ ] Throttling: simple user throttle for non-staff
 
 ## Sprint 3 — Celery & Scheduled Job (1–2 sessions)
 
-* [ ] Enable **django-celery-beat** in settings; DB schedules
-* [ ] **Generator task**: `work.tasks.generate_workorders()`
+- [ ] Enable **django-celery-beat** in settings; DB schedules
+- [ ] **Generator task**: `work.tasks.generate_workorders()`
   - Reads `MaintenanceTask.cadence` (monthly/weekly) and creates upcoming `WorkOrder`s per `Asset`
-* [ ] **Healthcheck task** (optional): `core.tasks.daily_asset_healthcheck()` — flag overdue; auto-create `ActivityInstance(kind="checked")`
-* [ ] **Manual staff endpoint**: DRF action to run generator/healthcheck
+- [ ] **Healthcheck task** (optional): `core.tasks.daily_asset_healthcheck()` — flag overdue; auto-create `ActivityInstance(kind="checked")`
+- [ ] **Manual staff endpoint**: DRF action to run generator/healthcheck
 
 ## Sprint 4 — Auth & Roles (1–2 sessions)
 
-* [x] **Custom user** already present from template; set `AUTH_USER_MODEL` if not already.
-* [ ] Create groups via data migration or `post_migrate`: `maintenance_viewer`, `maintenance_manager`
-* [ ] Role tests: viewer read-only; manager full write
+- [x] **Custom user** already present from template; set `AUTH_USER_MODEL` if not already.
+- [ ] Create groups via data migration or `post_migrate`: `maintenance_viewer`, `maintenance_manager`
+- [ ] Role tests: viewer read-only; manager full write
 
 ## Sprint 5 — Tests (full coverage; start in Sprint 1 and grow)
 
 > Target: **95–100%** on `assets` + `work` + critical paths in `config` and `accounts` integration
 
-* [ ] **Test stack**: `pytest`, `pytest-django`, `pytest-cov`, `model_bakery` or `factory_boy`, `freezegun`
-* [ ] **Factories**: `AssetFactory`, `FormFactorFactory`, `OSFactory`, `ApplicationFactory`, `ProjectFactory`, `MaintenanceTaskFactory`, `WorkOrderFactory`, `ActivityInstanceFactory`, `UserFactory(with Group)`
-* [ ] **Model tests**: str/repr; relationships; `WorkOrder.status` transitions; cadence parsing edge cases
-* [ ] **Admin tests**: list loads; filters; actions; perms
-* [ ] **API tests**: list/detail/create/update/delete; perms by role; pagination; filters; ordering; throttling
-* [ ] **Celery tests**: unit test `generate_workorders` & healthcheck (freeze time)
-* [ ] **Settings smoke**: prod env parsing
-* [ ] **Coverage gate**: `--cov-fail-under=95`
+- [ ] **Test stack**: `pytest`, `pytest-django`, `pytest-cov`, `model_bakery` or `factory_boy`, `freezegun`
+- [ ] **Factories**: `AssetFactory`, `FormFactorFactory`, `OSFactory`, `ApplicationFactory`, `ProjectFactory`, `MaintenanceTaskFactory`, `WorkOrderFactory`, `ActivityInstanceFactory`, `UserFactory(with Group)`
+- [ ] **Model tests**: str/repr; relationships; `WorkOrder.status` transitions; cadence parsing edge cases
+- [ ] **Admin tests**: list loads; filters; actions; perms
+- [ ] **API tests**: list/detail/create/update/delete; perms by role; pagination; filters; ordering; throttling
+- [ ] **Celery tests**: unit test `generate_workorders` & healthcheck (freeze time)
+- [ ] **Settings smoke**: prod env parsing
+- [ ] **Coverage gate**: `--cov-fail-under=95`
 
 ## Sprint 6 — CI (CircleCI) (1 session)
 
-* [ ] Ensure `.circleci/config.yml` exists; if not, add job with **Python + Postgres + Redis** services → run `pytest --cov` → store `coverage.xml`
-* [ ] Add **badge** to README:
+- [ ] Ensure `.circleci/config.yml` exists; if not, add job with **Python + Postgres + Redis** services → run `pytest --cov` → store `coverage.xml`
+- [ ] Add **badge** to README:
   `[![CircleCI](https://circleci.com/gh/<ORG>/planit-mini.svg?style=shield)](https://circleci.com/gh/<ORG>/planit-mini)`
 
 ## Sprint 7 — Heroku (vanilla) (1 session)
 
-* [x] `Procfile` present; keep `web:` and add `worker:` & `beat:` entries for Celery.
+- [x] `Procfile` present; keep `web:` and add `worker:` & `beat:` entries for Celery.
   ```
   web: gunicorn config.wsgi --log-file -  
   worker: celery -A config worker -l info  
   beat: celery -A config beat -l info
   ```
-* [ ] `runtime.txt`: `python-3.12.x`
-* [ ] `requirements.txt`: add `gunicorn`, `psycopg2-binary`, `dj-database-url`, `whitenoise`, `django-celery-beat`
-* [ ] `settings/prod.py`: `DEBUG=False`, `ALLOWED_HOSTS`, `SECURE_*`, `whitenoise`
-* [ ] **Addons**: Heroku Postgres + Heroku Redis
-* [ ] **Config Vars**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DJANGO_SETTINGS_MODULE=config.settings.prod`
-* [ ] `collectstatic`, smoke test `/api/assets/`, `/api/workorders/`
+- [ ] `runtime.txt`: `python-3.12.x`
+- [ ] `requirements.txt`: add `gunicorn`, `psycopg2-binary`, `dj-database-url`, `whitenoise`, `django-celery-beat`
+- [ ] `settings/prod.py`: `DEBUG=False`, `ALLOWED_HOSTS`, `SECURE_*`, `whitenoise`
+- [ ] **Addons**: Heroku Postgres + Heroku Redis
+- [ ] **Config Vars**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DJANGO_SETTINGS_MODULE=config.settings.prod`
+- [ ] `collectstatic`, smoke test `/api/assets/`, `/api/workorders/`
 
 ## Sprint 8 — UX & Admin Polish (1–2 sessions)
 
-* [ ] DRF: default pagination + `?search=` on Asset name/notes
-* [ ] Admin: filters (form factor, OS, apps, status), autocomplete FKs
-* [ ] README screenshots: Admin lists, API results, coverage report
+- [ ] DRF: default pagination + `?search=` on Asset name/notes
+- [ ] Admin: filters (form factor, OS, apps, status), autocomplete FKs
+- [ ] README screenshots: Admin lists, API results, coverage report
 
 ## Sprint 9 — Dockerize (later) (1–2 sessions)
 
-* [ ] Multi-stage `Dockerfile`, `docker-compose.yml` (web, worker, beat, postgres, redis)
-* [ ] Healthchecks; `.env.docker` sample; Make targets: `up`, `down`, `logs`
+- [ ] Multi-stage `Dockerfile`, `docker-compose.yml` (web, worker, beat, postgres, redis)
+- [ ] Healthchecks; `.env.docker` sample; Make targets: `up`, `down`, `logs`
 
 ---
 
 ## Optional Side Quest — Self-Host on a Pi (after Heroku)
 
 **Host prep**
-* [ ] OS updates, static IP; Postgres 16, Redis 7
-* [ ] Python 3.12 venv; `/srv/planit-mini/{app,static,media}`
-* [ ] System users; firewall; (TLS via Caddy/Traefik optional)
+- [ ] OS updates, static IP; Postgres 16, Redis 7
+- [ ] Python 3.12 venv; `/srv/planit-mini/{app,static,media}`
+- [ ] System users; firewall; (TLS via Caddy/Traefik optional)
 
 **Services**
-* [ ] systemd units: `gunicorn`, `celery` worker, `celery beat` (bind 127.0.0.1:8000)
-* [ ] Reverse proxy; monitoring via `node_exporter` + `blackbox_exporter` hitting `/healthz`
+- [ ] systemd units: `gunicorn`, `celery` worker, `celery beat` (bind 127.0.0.1:8000)
+- [ ] Reverse proxy; monitoring via `node_exporter` + `blackbox_exporter` hitting `/healthz`
 
 **Deploy flow**
-* [ ] git pull → install deps → migrate → collectstatic → restart units
+- [ ] git pull → install deps → migrate → collectstatic → restart units
 
 ---
 
 ## Test Inventory (tick-off list)
 
 **Models**
-* [ ] `Asset` CRUD, apps M2M, warranty status helpers  
-* [ ] `WorkOrder` state transitions, due date queries  
-* [ ] `MaintenanceTask` cadence parse/validate  
-* [ ] `ActivityInstance` attach to `WorkOrder` or just `Asset` (both paths)
+- [ ] `Asset` CRUD, apps M2M, warranty status helpers  
+- [ ] `WorkOrder` state transitions, due date queries  
+- [ ] `MaintenanceTask` cadence parse/validate  
+- [ ] `ActivityInstance` attach to `WorkOrder` or just `Asset` (both paths)
 
 **Admin**
-* [ ] Asset/WorkOrder list pages load; filters/search work  
-* [ ] Inline relations render; bulk actions perms enforced
+- [ ] Asset/WorkOrder list pages load; filters/search work  
+- [ ] Inline relations render; bulk actions perms enforced
 
 **API**
-* [ ] Auth required; anonymous 401  
-* [ ] Viewer read-only; Manager write  
-* [ ] Pagination default 20; filters & ordering correct  
-* [ ] Throttling for non-staff
+- [ ] Auth required; anonymous 401  
+- [ ] Viewer read-only; Manager write  
+- [ ] Pagination default 20; filters & ordering correct  
+- [ ] Throttling for non-staff
 
 **Tasks**
-* [ ] `generate_workorders` creates the correct future window  
-* [ ] Healthcheck flags overdue; creates Activity evidence
+- [ ] `generate_workorders` creates the correct future window  
+- [ ] Healthcheck flags overdue; creates Activity evidence
 
 **Config**
-* [ ] Env parsing in `prod.py` smoke  
-* [ ] `/admin/` + `/healthz` up locally & in prod
+- [ ] Env parsing in `prod.py` smoke  
+- [ ] `/admin/` + `/healthz` up locally & in prod
 
 **Coverage**
-* [ ] `pytest --cov=. --cov-report=term-missing --cov-fail-under=95`
+- [ ] `pytest --cov=. --cov-report=term-missing --cov-fail-under=95`
 
 ---
 
