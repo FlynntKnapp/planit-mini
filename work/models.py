@@ -13,6 +13,15 @@ class MaintenanceTask(models.Model):
     name = models.CharField(max_length=120)  # unique per workspace
     cadence = models.CharField(max_length=30)  # "monthly", "weekly"
     description = models.TextField(blank=True)
+    threshold_json = models.JSONField(
+        blank=True,
+        null=True,
+        default=dict,
+        help_text=(
+            "Optional thresholds for this task, e.g. "
+            '{"max_days_overdue": 7, "window": "30d"}'
+        ),
+    )
 
     class Meta:
         unique_together = [("workspace", "name")]

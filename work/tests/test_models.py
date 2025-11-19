@@ -63,6 +63,31 @@ def test_maintenance_task_unique_per_workspace(workspace, another_workspace):
 
 
 @pytest.mark.django_db
+def test_maintenance_task_threshold_json_optional_and_persisted(workspace):
+    # Can create without specifying threshold_json
+    task = MaintenanceTask.objects.create(
+        workspace=workspace,
+        name="Backup verify",
+        cadence="weekly",
+        description="Verify backups",
+    )
+    # Default should be an empty dict (or None, depending on your chosen default)
+    assert task.threshold_json == {} or task.threshold_json is None
+
+    # Can store structured JSON data
+    thresholds = {"max_days_overdue": 7, "window": "30d"}
+    task_with_thresholds = MaintenanceTask.objects.create(
+        workspace=workspace,
+        name="Patch OS with thresholds",
+        cadence="monthly",
+        description="OS patching with thresholds",
+        threshold_json=thresholds,
+    )
+    task_with_thresholds.refresh_from_db()
+    assert task_with_thresholds.threshold_json == thresholds
+
+
+@pytest.mark.django_db
 def test_workorder_default_status_open(workspace, user):
     asset = _create_asset(workspace)
     task = MaintenanceTask.objects.create(
