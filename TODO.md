@@ -128,8 +128,8 @@ config/**init**.py # celery loader
 
 ## Sprint 6 — CI (CircleCI) (1 session)
 
-- [ ] Ensure `.circleci/config.yml` exists; if not, add job with **Python + Postgres + Redis** services → run `pytest --cov` → store `coverage.xml`
-- [ ] Add **badge** to README:
+- [x] Ensure `.circleci/config.yml` exists; if not, add job with **Python + Postgres + Redis** services → run `pytest --cov` → store `coverage.xml`
+- [x] Add **badge** to README:
   `[![CircleCI](https://circleci.com/gh/<ORG>/planit-mini.svg?style=shield)](https://circleci.com/gh/<ORG>/planit-mini)`
 
 ## Sprint 7 — Heroku (vanilla) (1 session)
@@ -140,11 +140,11 @@ config/**init**.py # celery loader
   worker: celery -A config worker -l info  
   beat: celery -A config beat -l info
   ```
-- [ ] `runtime.txt`: `python-3.12.x`
-- [ ] `requirements.txt`: add `gunicorn`, `psycopg2-binary`, `dj-database-url`, `whitenoise`, `django-celery-beat`
-- [ ] `settings/prod.py`: `DEBUG=False`, `ALLOWED_HOSTS`, `SECURE_*`, `whitenoise`
+- [x] `.python-version`
+- [x] `Pipfile`: add `gunicorn`, `psycopg2-binary`, `config.utils.get_database_config_variables`, `whitenoise`, `django-celery-beat`
+- [x] `settings/prod.py`: `DEBUG=False`, `ALLOWED_HOSTS`, `SECURE_*`, `whitenoise`
 - [ ] **Addons**: Heroku Postgres + Heroku Redis
-- [ ] **Config Vars**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DJANGO_SETTINGS_MODULE=config.settings.prod`
+- [x] **Config Vars**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DJANGO_SETTINGS_MODULE=config.settings.prod`
 - [ ] `collectstatic`, smoke test `/api/assets/`, `/api/workorders/`
 
 ## Sprint 8 — UX & Admin Polish (1–2 sessions)
