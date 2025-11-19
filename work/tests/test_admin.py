@@ -1,17 +1,23 @@
+# work/tests/test_admin.py
+
+from datetime import timedelta
+
 import pytest
 from django.contrib import admin as dj_admin
+from django.test import RequestFactory
 from django.utils import timezone
 
+from assets.models import Asset
+from core.models import Workspace
 from work.admin import (
     ActivityInstanceAdmin,
     ActivityInstanceInline,
+    DueWindowFilter,
     MaintenanceTaskAdmin,
     WorkOrderAdmin,
     WorkOrderInline,
 )
 from work.models import ActivityInstance, MaintenanceTask, WorkOrder
-from core.models import Workspace
-from assets.models import Asset
 
 
 @pytest.mark.parametrize(
@@ -43,6 +49,8 @@ def test_activityinstance_inline_configuration():
     # Activity inline still uses both raw_id_fields and autocomplete
     assert inline.raw_id_fields == ("asset", "performed_by")
     assert inline.autocomplete_fields == ("asset", "performed_by")
+    # Recent-first ordering
+    assert inline.ordering == ("-occurred_at",)
 
 
 def test_maintenance_task_admin_configuration():
@@ -63,6 +71,25 @@ def test_maintenance_task_admin_configuration():
     # readonly id field
     assert "id" in ma.readonly_fields
 
+    # Has "Generate Preview" action wired up
+    action_names = set(ma.actions)
+    assert "generate_preview" in action_names
+
+
+@pytest.mark.django_db
+def test_generate_preview_action_noop():
+    """
+    MaintenanceTaskAdmin.generate_preview should be callable and side-effect free.
+    """
+    workspace = Workspace.objects.create(name="WS", slug="ws")
+    MaintenanceTask.objects.create(workspace=workspace, name="Task", cadence="monthly")
+
+    ma = MaintenanceTaskAdmin(MaintenanceTask, dj_admin.site)
+    qs = MaintenanceTask.objects.all()
+
+    # Should not raise
+    ma.generate_preview(request=None, queryset=qs)
+
 
 def test_work_order_admin_configuration():
     ma = WorkOrderAdmin(WorkOrder, dj_admin.site)
@@ -77,8 +104,10 @@ def test_work_order_admin_configuration():
         "requested_by",
     )
 
+    # Existing filters plus due window filter
     for field in ("workspace", "status", "task"):
         assert field in ma.list_filter
+    assert DueWindowFilter in ma.list_filter
 
     for field in (
         "task__name",
@@ -247,3 +276,72 @@ def test_mark_cancelled_action():
 
     order.refresh_from_db()
     assert order.status == "cancelled"
+
+
+@pytest.mark.django_db
+def test_due_window_filter_querysets():
+    """
+    Verify DueWindowFilter buckets work orders into correct windows.
+    """
+    workspace = Workspace.objects.create(name="WS4", slug="ws4")
+    asset = Asset.objects.create(workspace=workspace, name="Asset 4", kind="PI")
+    task = MaintenanceTask.objects.create(
+        workspace=workspace,
+        name="Task 4",
+        cadence="monthly",
+    )
+
+    now = timezone.now()
+
+    overdue = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=now - timedelta(days=1),
+        status="open",
+    )
+    next_7 = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=now + timedelta(days=3),
+        status="open",
+    )
+    next_30 = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=now + timedelta(days=15),
+        status="open",
+    )
+    future = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=now + timedelta(days=40),
+        status="open",
+    )
+
+    rf = RequestFactory()
+    base_qs = WorkOrder.objects.all()
+    model_admin = WorkOrderAdmin(WorkOrder, dj_admin.site)
+
+    def run_filter(value):
+        # This mimics Django admin: request.GET is a QueryDict,
+        # and get_list_filter passes request.GET.copy() as params.
+        request = rf.get("/admin/work/workorder/", {"due_window": value})
+        params = request.GET.copy()  # mutable QueryDict
+        flt = DueWindowFilter(request, params, WorkOrder, model_admin)
+        return flt.queryset(request, base_qs)
+
+    # Overdue
+    assert list(run_filter("overdue")) == [overdue]
+
+    # Next 7 days
+    assert list(run_filter("next_7_days")) == [next_7]
+
+    # Next 30 days (disjoint from next_7_days)
+    assert list(run_filter("next_30_days")) == [next_30]
+
+    # Future (>= 30 days)
+    assert list(run_filter("future")) == [future]

@@ -1,8 +1,11 @@
 # assets/admin.py
 
 from django.contrib import admin
+from django.utils import timezone
 
-from .models import Asset, Application, FormFactor, OS, Project
+from work.admin import ActivityInstanceInline, WorkOrderInline
+
+from .models import OS, Application, Asset, FormFactor, Project
 
 
 @admin.register(FormFactor)
@@ -49,12 +52,15 @@ class AssetAdmin(admin.ModelAdmin):
         "location",
         "purchase_date",
         "warranty_expires",
+        "warranty_status",
+        "next_due_status",
     )
     list_filter = (
         "workspace",
         "kind",
         "form_factor",
         "os",
+        "applications",  # filter by installed apps
         "location",
         "purchase_date",
         "warranty_expires",
@@ -71,9 +77,63 @@ class AssetAdmin(admin.ModelAdmin):
         "project",
         "form_factor",
         "os",
-        "applications",  # optional: use autocomplete instead of dual list
+        "applications",  # autocomplete instead of dual list
     )
-    # If you switch applications to autocomplete, drop filter_horizontal:
     date_hierarchy = "purchase_date"
     list_select_related = ("workspace", "project", "form_factor", "os")
     ordering = ("workspace", "name")
+    # Inlines: work orders + recent activity on this asset
+    inlines = [WorkOrderInline, ActivityInstanceInline]
+
+    # --- Status "chips" -----------------------------------------------------
+
+    def warranty_status(self, obj) -> str:
+        """
+        Human-friendly warranty status summary.
+
+        - 'n/a'           : no warranty date
+        - 'Expired'       : warranty_expires < today
+        - 'Expiring soon' : 0–30 days left
+        - 'Active'        : > 30 days left
+        """
+        if not obj.warranty_expires:
+            return "n/a"
+
+        today = timezone.now().date()
+        delta_days = (obj.warranty_expires - today).days
+
+        if delta_days < 0:
+            return "Expired"
+        if delta_days <= 30:
+            return "Expiring soon"
+        return "Active"
+
+    warranty_status.short_description = "Warranty"
+
+    def next_due_status(self, obj) -> str:
+        """
+        Status of the next open WorkOrder for this asset:
+
+        - 'No open work'
+        - 'Overdue'
+        - 'Due today'
+        - 'Due soon' (<= 7 days)
+        - 'Scheduled' (> 7 days)
+        """
+        now = timezone.now()
+        next_order = obj.workorders.filter(status="open").order_by("due").first()
+
+        if not next_order:
+            return "No open work"
+
+        if next_order.due < now:
+            return "Overdue"
+
+        days = (next_order.due.date() - now.date()).days
+        if days == 0:
+            return "Due today"
+        if days <= 7:
+            return "Due soon"
+        return "Scheduled"
+
+    next_due_status.short_description = "Next work"

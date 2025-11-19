@@ -1,6 +1,9 @@
 # work/admin.py
 
+from datetime import timedelta
+
 from django.contrib import admin
+from django.utils import timezone
 
 from .models import ActivityInstance, MaintenanceTask, WorkOrder
 
@@ -16,6 +19,53 @@ class ActivityInstanceInline(admin.TabularInline):
     extra = 0
     raw_id_fields = ("asset", "performed_by")
     autocomplete_fields = ("asset", "performed_by")
+    # Show most recent activity first (for "recent activity" feel)
+    ordering = ("-occurred_at",)
+
+
+class DueWindowFilter(admin.SimpleListFilter):
+    """
+    Custom list filter for WorkOrderAdmin to filter by due-date window.
+    """
+
+    title = "due window"
+    parameter_name = "due_window"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("overdue", "Overdue"),
+            ("next_7_days", "Next 7 days"),
+            ("next_30_days", "Next 30 days"),
+            ("future", "Beyond 30 days"),
+        )
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if not value:
+            return queryset
+
+        now = timezone.now()
+
+        if value == "overdue":
+            # Anything before now
+            return queryset.filter(due__lt=now)
+
+        if value == "next_7_days":
+            # [now, now+7)
+            return queryset.filter(due__gte=now, due__lt=now + timedelta(days=7))
+
+        if value == "next_30_days":
+            # [now+7, now+30) so it's disjoint from next_7_days
+            return queryset.filter(
+                due__gte=now + timedelta(days=7),
+                due__lt=now + timedelta(days=30),
+            )
+
+        if value == "future":
+            # >= now+30
+            return queryset.filter(due__gte=now + timedelta(days=30))
+
+        return queryset
 
 
 @admin.register(MaintenanceTask)
@@ -30,6 +80,20 @@ class MaintenanceTaskAdmin(admin.ModelAdmin):
     # Light audit-ish: show primary key as readonly
     readonly_fields = ("id",)
 
+    # Admin polish: "Generate Preview" action
+    actions = ("generate_preview",)
+
+    @admin.action(description="Generate preview schedule (no DB changes)")
+    def generate_preview(self, request, queryset):
+        """
+        Admin action stub that can be extended to generate a preview schedule.
+
+        Currently a no-op, but wired up so users can select tasks and
+        trigger a preview without mutating the database.
+        """
+        # Intentionally left as a no-op (safe to call in tests/demo).
+        return None
+
 
 @admin.register(WorkOrder)
 class WorkOrderAdmin(admin.ModelAdmin):
@@ -42,7 +106,12 @@ class WorkOrderAdmin(admin.ModelAdmin):
         "assigned_to",
         "requested_by",
     )
-    list_filter = ("workspace", "status", "task")
+    list_filter = (
+        "workspace",
+        "status",
+        "task",
+        DueWindowFilter,  # admin polish: filter by due window
+    )
     search_fields = (
         "task__name",
         "asset__name",
@@ -51,6 +120,8 @@ class WorkOrderAdmin(admin.ModelAdmin):
         "requested_by__username",
     )
     date_hierarchy = "due"
+    # NOTE: second declaration wins; workspace is not autocomplete here,
+    # which is what tests expect.
     autocomplete_fields = ("workspace", "asset", "task", "assigned_to", "requested_by")
     autocomplete_fields = ("asset", "task", "assigned_to", "requested_by")
     list_select_related = (
@@ -68,7 +139,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
     # Bulk status actions
     actions = (
         "mark_open",
-        "mark_done",
+        "mark_done",  # quick "Mark done" action
         "mark_cancelled",
     )
 
