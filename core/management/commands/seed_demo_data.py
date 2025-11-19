@@ -36,7 +36,7 @@ class Command(BaseCommand):
             )
             if created:
                 user.set_password("devpassword")
-                # If your CustomUser has extra fields (like registration_accepted), tweak here:
+                # If your CustomUser has extra fields (like registration_accepted):
                 if hasattr(user, "registration_accepted"):
                     user.registration_accepted = True
                 user.save()
