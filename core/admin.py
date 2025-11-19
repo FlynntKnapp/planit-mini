@@ -9,7 +9,6 @@ class MembershipInline(admin.TabularInline):
     model = Membership
     extra = 1
     autocomplete_fields = ("user",)
-    raw_id_fields = ("user",)
     # If you want to prevent deleting memberships from inline:
     # can_delete = False
 
@@ -32,5 +31,5 @@ class MembershipAdmin(admin.ModelAdmin):
         "user__email",
         "workspace__name",
     )
-    raw_id_fields = ("user", "workspace")
+    autocomplete_fields = ("user", "workspace")
     ordering = ("workspace", "user")

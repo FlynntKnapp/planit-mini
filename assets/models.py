@@ -9,6 +9,9 @@ class FormFactor(models.Model):
     name = models.CharField(max_length=80, unique=True)
     slug = models.SlugField(unique=True)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class OS(models.Model):
     name = models.CharField(max_length=80)
@@ -18,11 +21,22 @@ class OS(models.Model):
     class Meta:
         verbose_name_plural = "Operating Systems"
 
+    def __str__(self) -> str:
+        # "Ubuntu 24.04", "Debian" (no trailing space if version is blank)
+        if self.version:
+            return f"{self.name} {self.version}"
+        return self.name
+
 
 class Application(models.Model):
     name = models.CharField(max_length=120)
     version = models.CharField(max_length=60, blank=True)
     slug = models.SlugField(unique=True)
+
+    def __str__(self) -> str:
+        if self.version:
+            return f"{self.name} {self.version}"
+        return self.name
 
 
 class Project(models.Model):
@@ -35,6 +49,10 @@ class Project(models.Model):
 
     class Meta:
         unique_together = [("workspace", "slug")]
+
+    def __str__(self) -> str:
+        # e.g. "Personal – Homelab"
+        return f"{self.workspace}: {self.name}"
 
 
 class Asset(models.Model):
@@ -54,3 +72,8 @@ class Asset(models.Model):
     purchase_date = models.DateField(null=True, blank=True)
     warranty_expires = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
+
+    def __str__(self) -> str:
+        # e.g. "Remote Lamp (PI) @ Homelab"
+        kind_display = dict(self.KIND_CHOICES).get(self.kind, self.kind)
+        return f"{self.name} ({kind_display}) @ {self.workspace}"
