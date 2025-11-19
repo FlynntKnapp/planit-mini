@@ -8,7 +8,6 @@ from .models import ActivityInstance, MaintenanceTask, WorkOrder
 class WorkOrderInline(admin.TabularInline):
     model = WorkOrder
     extra = 0
-    raw_id_fields = ("asset", "assigned_to", "requested_by")
     autocomplete_fields = ("asset", "assigned_to", "requested_by")
 
 
@@ -24,7 +23,7 @@ class MaintenanceTaskAdmin(admin.ModelAdmin):
     list_display = ("name", "workspace", "cadence")
     list_filter = ("workspace", "cadence")
     search_fields = ("name", "description", "workspace__name")
-    raw_id_fields = ("workspace",)
+    autocomplete_fields = ("workspace",)
     ordering = ("workspace", "name")
     inlines = [WorkOrderInline]
 
@@ -52,7 +51,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
         "requested_by__username",
     )
     date_hierarchy = "due"
-    raw_id_fields = ("workspace", "asset", "task", "assigned_to", "requested_by")
+    autocomplete_fields = ("workspace", "asset", "task", "assigned_to", "requested_by")
     autocomplete_fields = ("asset", "task", "assigned_to", "requested_by")
     list_select_related = (
         "workspace",
@@ -114,8 +113,7 @@ class ActivityInstanceAdmin(admin.ModelAdmin):
         "note",
     )
     date_hierarchy = "occurred_at"
-    raw_id_fields = ("workspace", "asset", "work_order", "performed_by")
-    autocomplete_fields = ("asset", "work_order", "performed_by")
+    autocomplete_fields = ("workspace", "asset", "work_order", "performed_by")
     list_select_related = (
         "workspace",
         "asset",

@@ -33,7 +33,7 @@ class ProjectAdmin(admin.ModelAdmin):
     search_fields = ("name", "description", "slug")
     list_filter = ("workspace",)
     prepopulated_fields = {"slug": ("name",)}
-    raw_id_fields = ("workspace",)
+    autocomplete_fields = ("workspace",)  # search by workspace name
     ordering = ("workspace", "name")
 
 
@@ -66,8 +66,14 @@ class AssetAdmin(admin.ModelAdmin):
         "workspace__name",
         "project__name",
     )
-    raw_id_fields = ("workspace", "project", "form_factor", "os")
-    filter_horizontal = ("applications",)
+    autocomplete_fields = (
+        "workspace",
+        "project",
+        "form_factor",
+        "os",
+        "applications",  # optional: use autocomplete instead of dual list
+    )
+    # If you switch applications to autocomplete, drop filter_horizontal:
     date_hierarchy = "purchase_date"
     list_select_related = ("workspace", "project", "form_factor", "os")
     ordering = ("workspace", "name")

@@ -26,3 +26,6 @@ class Membership(models.Model):
 
     class Meta:
         unique_together = [("user", "workspace")]
+
+    def __str__(self) -> str:
+        return f"{self.user} → {self.workspace} ({self.role})"

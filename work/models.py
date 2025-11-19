@@ -17,6 +17,9 @@ class MaintenanceTask(models.Model):
     class Meta:
         unique_together = [("workspace", "name")]
 
+    def __str__(self) -> str:
+        return f"{self.name} ({self.workspace}, {self.cadence})"
+
 
 class WorkOrder(models.Model):
     workspace = models.ForeignKey(
@@ -45,6 +48,9 @@ class WorkOrder(models.Model):
         on_delete=models.SET_NULL,
         related_name="requested_workorders",
     )
+
+    def __str__(self) -> str:
+        return f"{self.task} → {self.asset} [{self.status}]"
 
 
 class ActivityInstance(models.Model):
@@ -76,3 +82,8 @@ class ActivityInstance(models.Model):
         on_delete=models.SET_NULL,
         related_name="performed_activities",
     )
+
+    def __str__(self) -> str:
+        return (
+            f"{self.get_kind_display()} on {self.asset} at {self.occurred_at:%Y-%m-%d}"
+        )

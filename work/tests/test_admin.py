@@ -30,8 +30,9 @@ def test_workorder_inline_configuration():
 
     assert inline.model is WorkOrder
     assert inline.extra == 0
-    assert inline.raw_id_fields == ("asset", "assigned_to", "requested_by")
+    # Inline now uses autocomplete only (no raw_id_fields)
     assert inline.autocomplete_fields == ("asset", "assigned_to", "requested_by")
+    assert inline.raw_id_fields == ()
 
 
 def test_activityinstance_inline_configuration():
@@ -39,6 +40,7 @@ def test_activityinstance_inline_configuration():
 
     assert inline.model is ActivityInstance
     assert inline.extra == 0
+    # Activity inline still uses both raw_id_fields and autocomplete
     assert inline.raw_id_fields == ("asset", "performed_by")
     assert inline.autocomplete_fields == ("asset", "performed_by")
 
@@ -48,10 +50,13 @@ def test_maintenance_task_admin_configuration():
 
     assert ma.list_display == ("name", "workspace", "cadence")
     assert ma.list_filter == ("workspace", "cadence")
+
     for field in ("name", "description", "workspace__name"):
         assert field in ma.search_fields
 
-    assert ma.raw_id_fields == ("workspace",)
+    # Uses autocomplete for workspace (no raw_id_fields)
+    assert ma.autocomplete_fields == ("workspace",)
+    assert ma.raw_id_fields == ()
     assert ma.ordering == ("workspace", "name")
     # Inline: WorkOrderInline should be attached here (not on WorkOrderAdmin)
     assert WorkOrderInline in ma.inlines
@@ -85,14 +90,12 @@ def test_work_order_admin_configuration():
         assert field in ma.search_fields
 
     assert ma.date_hierarchy == "due"
-    assert ma.raw_id_fields == (
-        "workspace",
-        "asset",
-        "task",
-        "assigned_to",
-        "requested_by",
-    )
+
+    # WorkOrderAdmin now uses autocomplete, not raw_id_fields.
+    # Note the second declaration in admin means the effective value is:
     assert ma.autocomplete_fields == ("asset", "task", "assigned_to", "requested_by")
+    assert ma.raw_id_fields == ()
+
     assert ma.list_select_related == (
         "workspace",
         "asset",
@@ -136,13 +139,16 @@ def test_activity_instance_admin_configuration():
         assert field in ma.search_fields
 
     assert ma.date_hierarchy == "occurred_at"
-    assert ma.raw_id_fields == (
+
+    # ActivityInstanceAdmin now uses autocomplete for all these FKs
+    assert ma.autocomplete_fields == (
         "workspace",
         "asset",
         "work_order",
         "performed_by",
     )
-    assert ma.autocomplete_fields == ("asset", "work_order", "performed_by")
+    assert ma.raw_id_fields == ()
+
     assert ma.list_select_related == (
         "workspace",
         "asset",
