@@ -4,33 +4,26 @@ jobs:
   build_and_test:
     docker:
       - image: cimg/python:3.12
-
     working_directory: ~/repo
-
     steps:
-      # Step 1: Checkout code
       - checkout
 
-      # Step 2: Install pipenv
       - run:
           name: Install pipenv
           command: |
             python -m pip install --upgrade pip
             pip install pipenv
 
-      # Step 3: Install dependencies
       - run:
           name: Install dependencies with pipenv
           command: |
             pipenv install --dev
 
-      # Step 4: Run linter (flake8)
       - run:
           name: Run flake8 linter
           command: |
             pipenv run flake8 .
 
-      # Step 5: Run pytest with coverage
       - run:
           name: Run pytest with coverage
           command: |
@@ -42,29 +35,45 @@ jobs:
               --cov-report=term-missing \
               --cov-fail-under=80
 
-  deploy:
+  deploy_prod:
     docker:
       - image: cimg/python:3.12
-
     working_directory: ~/repo
-
     steps:
       - checkout
-
       - run:
-          name: Deploy main to Heroku
+          name: Deploy main to Heroku PROD
           command: |
-            # HEROKU_APP_NAME and HEROKU_API_KEY are set in CircleCI project settings.
-            git push https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git main
+            git push https://heroku:${HEROKU_API_KEY}@git.heroku.com/planit-mini-prod.git main
+
+  deploy_dev:
+    docker:
+      - image: cimg/python:3.12
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Deploy develop to Heroku DEV
+          command: |
+            # Push local develop branch, but store it on Heroku as main
+            git push https://heroku:${HEROKU_API_KEY}@git.heroku.com/planit-mini-dev.git develop:main
 
 workflows:
   version: 2
   test_and_deploy:
     jobs:
       - build_and_test
-      - deploy:
+
+      - deploy_prod:
           requires:
             - build_and_test
           filters:
             branches:
               only: main
+
+      - deploy_dev:
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              only: develop
