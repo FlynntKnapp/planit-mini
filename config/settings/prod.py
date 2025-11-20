@@ -8,16 +8,13 @@ from .base import *  # noqa: F403, F401
 
 DEBUG = False
 
-ALLOWED_HOSTS = (
-    os.getenv("ALLOWED_HOSTS", "").split(",")
-    if os.getenv("ALLOWED_HOSTS")
-    else [
+# If someone forgot to set env var, fail safe with explicit fallback
+if not ALLOWED_HOSTS:  # noqa: F405
+    ALLOWED_HOSTS = [
         "planit-mini-prod-f2a603e4e8d0.herokuapp.com",
     ]
-)
 
-# WhiteNoise & security
-MIDDLEWARE = MIDDLEWARE + ["whitenoise.middleware.WhiteNoiseMiddleware"]  # noqa: F405
+# Security
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -51,5 +48,3 @@ DATABASES = {
         },
     }
 }
-
-STATIC_ROOT = BASE_DIR / "staticfiles"  # noqa: F405
