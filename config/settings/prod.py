@@ -12,7 +12,7 @@ ALLOWED_HOSTS = (
     os.getenv("ALLOWED_HOSTS", "").split(",")
     if os.getenv("ALLOWED_HOSTS")
     else [
-        "your-heroku-app.herokuapp.com",
+        "planit-mini-prod-f2a603e4e8d0.herokuapp.com",
     ]
 )
 
