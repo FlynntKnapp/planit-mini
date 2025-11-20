@@ -1,8 +1,11 @@
 # config/settings/base.py
+
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+from config.utils import get_database_config_variables
 
 load_dotenv()
 
@@ -15,6 +18,35 @@ DEBUG = False  # default; env modules will override
 ALLOWED_HOSTS = [
     h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()
 ]
+
+
+def postgres_from_database_url(database_url: str):
+    """
+    Shared Postgres DATABASES builder using your custom DATABASE_URL parser.
+    Env-specific policy belongs in dev.py/prod.py.
+    """
+    database_config_variables = get_database_config_variables(database_url)
+
+    options = database_config_variables.get("OPTIONS") or {}
+    sslmode_list = options.get("sslmode") or ["require"]
+    sslmode = (
+        sslmode_list[0] if isinstance(sslmode_list, (list, tuple)) else sslmode_list
+    )
+
+    return {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": database_config_variables["DATABASE_NAME"],
+            "HOST": database_config_variables["DATABASE_HOST"],
+            "PORT": database_config_variables.get("DATABASE_PORT") or "5432",
+            "USER": database_config_variables["DATABASE_USER"],
+            "PASSWORD": database_config_variables["DATABASE_PASSWORD"],
+            "OPTIONS": {
+                "sslmode": sslmode,
+            },
+        }
+    }
+
 
 INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
