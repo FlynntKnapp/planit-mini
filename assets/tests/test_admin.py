@@ -6,13 +6,8 @@ import pytest
 from django.contrib import admin as dj_admin
 from django.utils import timezone
 
-from assets.admin import (
-    ApplicationAdmin,
-    AssetAdmin,
-    FormFactorAdmin,
-    OSAdmin,
-    ProjectAdmin,
-)
+from assets.admin import (ApplicationAdmin, AssetAdmin, FormFactorAdmin,
+                          OSAdmin, ProjectAdmin)
 from assets.models import OS, Application, Asset, FormFactor, Project
 from core.models import Workspace
 from work.admin import ActivityInstanceInline, WorkOrderInline

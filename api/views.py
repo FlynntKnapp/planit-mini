@@ -96,7 +96,11 @@ class WorkspaceViewSet(WorkspaceScopedMixin, viewsets.ModelViewSet):
     ordering = ["name"]
 
     def get_queryset(self):
-        return self.filter_by_membership(super().get_queryset())
+        user = self.request.user
+        if not user.is_authenticated or user.is_staff:
+            return super().get_queryset()
+        # For Workspace, filter by membership directly
+        return super().get_queryset().filter(memberships__user=user).distinct()
 
 
 class MembershipViewSet(viewsets.ModelViewSet):

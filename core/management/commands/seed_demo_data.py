@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from assets.models import Application, Asset, FormFactor, OS, Project
+from assets.models import OS, Application, Asset, FormFactor, Project
 from core.models import Membership, Workspace
 from work.models import ActivityInstance, MaintenanceTask, WorkOrder
 
