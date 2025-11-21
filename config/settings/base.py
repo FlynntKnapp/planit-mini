@@ -58,12 +58,14 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.admindocs",
     "rest_framework",
+    "django_filters",
     "storages",
     "base",
     "django_celery_beat",
     "assets.apps.AssetsConfig",
     "core.apps.CoreConfig",
     "work.apps.WorkConfig",
+    "api",
 ]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -124,11 +126,27 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "api.permissions.IsAuthenticatedReadOnlyOrManager",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
+        "rest_framework.filters.SearchFilter",
+    ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "api.throttling.NonStaffUserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        # Non-staff users; staff are exempt via the custom class
+        "non_staff_user": "1000/day",
+    },
 }
 
 # Email (safe defaults; override per-env)

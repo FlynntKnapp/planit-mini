@@ -17,8 +17,30 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic.base import TemplateView
+from rest_framework.routers import DefaultRouter
 
+from api import views as api_views
 from config.settings.base import THE_SITE_NAME
+
+router = DefaultRouter()
+router.register(r"workspaces", api_views.WorkspaceViewSet, basename="workspace")
+router.register(r"memberships", api_views.MembershipViewSet, basename="membership")
+router.register(r"form-factors", api_views.FormFactorViewSet, basename="formfactor")
+router.register(r"oses", api_views.OSViewSet, basename="os")
+router.register(r"applications", api_views.ApplicationViewSet, basename="application")
+router.register(r"projects", api_views.ProjectViewSet, basename="project")
+router.register(r"assets", api_views.AssetViewSet, basename="asset")
+router.register(
+    r"maintenance-tasks",
+    api_views.MaintenanceTaskViewSet,
+    basename="maintenancetask",
+)
+router.register(r"work-orders", api_views.WorkOrderViewSet, basename="workorder")
+router.register(
+    r"activities",
+    api_views.ActivityInstanceViewSet,
+    basename="activityinstance",
+)
 
 urlpatterns = [
     path(
@@ -33,4 +55,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
+    path("api/", include(router.urls)),
 ]
