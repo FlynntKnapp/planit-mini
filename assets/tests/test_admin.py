@@ -1,13 +1,18 @@
 # assets/tests/test_admin.py
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import pytest
 from django.contrib import admin as dj_admin
 from django.utils import timezone
 
-from assets.admin import (ApplicationAdmin, AssetAdmin, FormFactorAdmin,
-                          OSAdmin, ProjectAdmin)
+from assets.admin import (
+    ApplicationAdmin,
+    AssetAdmin,
+    FormFactorAdmin,
+    OSAdmin,
+    ProjectAdmin,
+)
 from assets.models import OS, Application, Asset, FormFactor, Project
 from core.models import Workspace
 from work.admin import ActivityInstanceInline, WorkOrderInline
@@ -155,7 +160,7 @@ def test_warranty_status_variants():
 
 
 @pytest.mark.django_db
-def test_next_due_status_variants():
+def test_next_due_status_variants(monkeypatch):
     """
     Ensure next_due_status reports:
     - No open work
@@ -164,6 +169,11 @@ def test_next_due_status_variants():
     - Due soon
     - Scheduled
     """
+    # Freeze "now" used inside AssetAdmin.next_due_status
+    tz = timezone.get_current_timezone()
+    fixed_now = datetime(2025, 1, 1, 10, 0, tzinfo=tz)
+    monkeypatch.setattr("assets.admin.timezone.now", lambda: fixed_now)
+
     workspace = Workspace.objects.create(name="WS2", slug="ws2")
     asset = Asset.objects.create(workspace=workspace, name="Asset", kind="PI")
     task = MaintenanceTask.objects.create(
@@ -173,7 +183,7 @@ def test_next_due_status_variants():
     )
 
     ma = AssetAdmin(Asset, dj_admin.site)
-    now = timezone.now()
+    now = fixed_now
 
     # No work orders
     assert ma.next_due_status(asset) == "No open work"
@@ -188,7 +198,7 @@ def test_next_due_status_variants():
     )
     assert ma.next_due_status(asset) == "Overdue"
 
-    # Due today
+    # Due today (same calendar date, later in the day)
     overdue.status = "done"
     overdue.save()
     due_today = WorkOrder.objects.create(
