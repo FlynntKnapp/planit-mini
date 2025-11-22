@@ -1,6 +1,6 @@
 # api/tests.py
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -331,4 +331,3 @@ class PermissionsTest(APITestSetup):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should return empty results
         self.assertEqual(len(response.data["results"]), 0)
-
