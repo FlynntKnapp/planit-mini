@@ -5,13 +5,7 @@ import datetime
 import pytest
 from django.db import IntegrityError, transaction
 
-from assets.models import (
-    OS,
-    Application,
-    Asset,
-    FormFactor,
-    Project,
-)
+from assets.models import OS, Application, Asset, FormFactor, Project
 
 
 @pytest.mark.django_db

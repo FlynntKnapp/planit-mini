@@ -20,6 +20,7 @@ coverage = "*"
 isort = "*"
 flake8 = "*"
 black = "*"
+django-filter = "*"
 
 [dev-packages]
 pytest-django = "*"

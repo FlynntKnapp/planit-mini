@@ -9,14 +9,9 @@ from django.utils import timezone
 
 from assets.models import Asset
 from core.models import Workspace
-from work.admin import (
-    ActivityInstanceAdmin,
-    ActivityInstanceInline,
-    DueWindowFilter,
-    MaintenanceTaskAdmin,
-    WorkOrderAdmin,
-    WorkOrderInline,
-)
+from work.admin import (ActivityInstanceAdmin, ActivityInstanceInline,
+                        DueWindowFilter, MaintenanceTaskAdmin, WorkOrderAdmin,
+                        WorkOrderInline)
 from work.models import ActivityInstance, MaintenanceTask, WorkOrder
 
 

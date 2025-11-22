@@ -83,6 +83,7 @@ class MaintenanceTaskAdmin(admin.ModelAdmin):
     # Admin polish: "Generate Preview" action
     actions = ("generate_preview",)
 
+    # TODO: implement preview generation
     @admin.action(description="Generate preview schedule (no DB changes)")
     def generate_preview(self, request, queryset):
         """

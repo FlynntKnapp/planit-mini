@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from assets.models import Application, Asset, FormFactor, OS, Project
+from assets.models import OS, Application, Asset, FormFactor, Project
 from core.models import Membership, Workspace
 from work.models import ActivityInstance, MaintenanceTask, WorkOrder
 
@@ -15,9 +15,50 @@ class Command(BaseCommand):
     help = "Seed demo/DEV data for planit-mini"
 
     def handle(self, *args, **options):
-        User = get_user_model()
+        now = timezone.now()
 
-        # --- Users (for Membership / WorkOrder / ActivityInstance) ---
+        users = self._create_users()
+        workspaces = self._create_workspaces()
+        self._create_memberships(users, workspaces)
+
+        form_factors = self._create_form_factors()
+        os_objects = self._create_os()
+        applications = self._create_applications()
+        projects = self._create_projects(workspaces)
+
+        assets = self._create_assets(
+            workspaces,
+            projects,
+            form_factors,
+            os_objects,
+            applications,
+        )
+        self._set_asset_warranties(assets)
+
+        tasks = self._create_tasks(workspaces)
+
+        workorders = self._create_workorders(
+            workspaces,
+            assets,
+            tasks,
+            users,
+            now,
+        )
+
+        self._create_activity_instances(
+            workspaces,
+            workorders,
+            assets,
+            users,
+            now,
+        )
+
+        self.stdout.write(self.style.SUCCESS("Demo data seeded successfully."))
+
+    # -------- Users / Workspaces / Memberships --------------------
+
+    def _create_users(self):
+        User = get_user_model()
         users_data = [
             {"username": "tiny", "email": "tiny@example.com"},
             {"username": "alice", "email": "alice@example.com"},
@@ -30,20 +71,19 @@ class Command(BaseCommand):
                 username=data["username"],
                 defaults={
                     "email": data["email"],
-                    # adjust or remove as you like in DEV
                     "is_staff": True,
                 },
             )
             if created:
                 user.set_password("devpassword")
-                # If your CustomUser has extra fields (like registration_accepted):
                 if hasattr(user, "registration_accepted"):
                     user.registration_accepted = True
                 user.save()
                 self.stdout.write(self.style.SUCCESS(f"Created user {user.username}"))
             users[data["username"]] = user
+        return users
 
-        # --- Workspaces ---
+    def _create_workspaces(self):
         workspaces_data = [
             {"name": "Home Lab", "slug": "home-lab"},
             {"name": "Laptop Fleet", "slug": "laptop-fleet"},
@@ -57,8 +97,9 @@ class Command(BaseCommand):
                 defaults={"name": data["name"]},
             )
             workspaces[data["slug"]] = ws
+        return workspaces
 
-        # --- Memberships (5–10 items) ---
+    def _create_memberships(self, users, workspaces):
         memberships_data = [
             {"username": "tiny", "workspace_slug": "home-lab", "role": "admin"},
             {"username": "tiny", "workspace_slug": "laptop-fleet", "role": "admin"},
@@ -78,7 +119,9 @@ class Command(BaseCommand):
                 defaults={"role": data["role"]},
             )
 
-        # --- FormFactor (5–10 items) ---
+    # -------- Assets & related seed data --------------------------
+
+    def _create_form_factors(self):
         form_factors_data = [
             {"name": "Raspberry Pi 4B", "slug": "rpi-4b"},
             {"name": "Mini PC", "slug": "mini-pc"},
@@ -95,8 +138,9 @@ class Command(BaseCommand):
                 defaults={"name": data["name"]},
             )
             form_factors[data["slug"]] = ff
+        return form_factors
 
-        # --- OS (5–10 items) ---
+    def _create_os(self):
         os_data = [
             {
                 "name": "Ubuntu Server",
@@ -135,8 +179,9 @@ class Command(BaseCommand):
                 },
             )
             os_objects[data["slug"]] = os_obj
+        return os_objects
 
-        # --- Application (5–10 items) ---
+    def _create_applications(self):
         applications_data = [
             {"name": "Docker Engine", "version": "24", "slug": "docker-24"},
             {"name": "PostgreSQL", "version": "16", "slug": "postgres-16"},
@@ -157,8 +202,9 @@ class Command(BaseCommand):
                 },
             )
             applications[data["slug"]] = app
+        return applications
 
-        # --- Project (5–10 items, across workspaces) ---
+    def _create_projects(self, workspaces):
         projects_data = [
             {
                 "workspace_slug": "home-lab",
@@ -204,8 +250,16 @@ class Command(BaseCommand):
                 },
             )
             projects[(data["workspace_slug"], data["slug"])] = proj
+        return projects
 
-        # --- Asset (5–10 items) ---
+    def _create_assets(
+        self,
+        workspaces,
+        projects,
+        form_factors,
+        os_objects,
+        applications,
+    ):
         assets_data = [
             {
                 "workspace_slug": "home-lab",
@@ -287,30 +341,26 @@ class Command(BaseCommand):
                     "location": data["location"],
                 },
             )
-            # Set many-to-many applications
             app_objs = [applications[s] for s in data["applications"]]
             asset.applications.set(app_objs)
             assets[data["name"]] = asset
+        return assets
 
-        # --- NEW: Warranty / purchase dates to demonstrate AssetAdmin chips ---
+    def _set_asset_warranties(self, assets):
         today = timezone.now().date()
         warranty_config = {
-            # Expired warranty
             "RPi4 Monitoring Node": {
                 "purchase_date": today - timedelta(days=365),
                 "warranty_expires": today - timedelta(days=10),
             },
-            # Expiring soon (within 30 days)
             "Backup Server": {
                 "purchase_date": today - timedelta(days=200),
                 "warranty_expires": today + timedelta(days=5),
             },
-            # Active (far in the future)
             "Proxmox Host": {
                 "purchase_date": today - timedelta(days=90),
                 "warranty_expires": today + timedelta(days=120),
             },
-            # No warranty end date: shows 'n/a', but has purchase date
             "Tiny Dev Laptop": {
                 "purchase_date": today - timedelta(days=400),
                 "warranty_expires": None,
@@ -325,7 +375,9 @@ class Command(BaseCommand):
             asset.warranty_expires = cfg["warranty_expires"]
             asset.save()
 
-        # --- MaintenanceTask (5–10 items total) ---
+    # -------- Tasks / WorkOrders / Activities ---------------------
+
+    def _create_tasks(self, workspaces):
         tasks_data = [
             {
                 "workspace_slug": "home-lab",
@@ -371,10 +423,10 @@ class Command(BaseCommand):
                 },
             )
             tasks[(data["workspace_slug"], data["name"])] = task
+        return tasks
 
-        # --- WorkOrder (5–10 items) ---
-        now = timezone.now()
-        workorders_data = [
+    def _build_workorders_data(self):
+        base_data = [
             {
                 "workspace_slug": "home-lab",
                 "asset_name": "RPi4 Monitoring Node",
@@ -431,42 +483,50 @@ class Command(BaseCommand):
             },
         ]
 
-        # --- NEW: Extra WorkOrders to demonstrate DueWindowFilter + next_due_status ---
         extra_workorders = [
-            # Overdue (due in the past)
             {
                 "workspace_slug": "home-lab",
                 "asset_name": "Backup Server",
                 "task_name": "Check backups",
-                "due_delta_days": -2,  # Overdue
+                "due_delta_days": -2,
                 "status": "open",
                 "assigned_to": "alice",
                 "requested_by": "tiny",
             },
-            # Due today
             {
                 "workspace_slug": "home-lab",
                 "asset_name": "RPi4 Monitoring Node",
                 "task_name": "Apply OS updates",
-                "due_delta_days": 0,  # Due today
+                "due_delta_days": 0,
                 "status": "open",
                 "assigned_to": "tiny",
                 "requested_by": "alice",
             },
-            # Far future (future window in filter)
             {
                 "workspace_slug": "laptop-fleet",
                 "asset_name": "Tiny Dev Laptop",
                 "task_name": "Laptop patching",
-                "due_delta_days": 45,  # >= 30 days, "future" bucket
+                "due_delta_days": 45,
                 "status": "open",
                 "assigned_to": "tiny",
                 "requested_by": "bob",
             },
         ]
-        workorders_data.extend(extra_workorders)
 
+        base_data.extend(extra_workorders)
+        return base_data
+
+    def _create_workorders(
+        self,
+        workspaces,
+        assets,
+        tasks,
+        users,
+        now,
+    ):
+        workorders_data = self._build_workorders_data()
         workorders = {}
+
         for idx, data in enumerate(workorders_data, start=1):
             ws = workspaces[data["workspace_slug"]]
             asset = assets[data["asset_name"]]
@@ -488,8 +548,16 @@ class Command(BaseCommand):
                 },
             )
             workorders[idx] = wo
+        return workorders
 
-        # --- ActivityInstance (5–10 items) ---
+    def _create_activity_instances(
+        self,
+        workspaces,
+        workorders,
+        assets,
+        users,
+        now,
+    ):
         activities_data = [
             {
                 "workspace_slug": "home-lab",
@@ -545,7 +613,8 @@ class Command(BaseCommand):
                 "performed_by": "tiny",
                 "occurred_delta_hours": -2,
             },
-            # NEW: a second activity on the same asset/work order to show recent-first ordering  # noqa:E501
+            # NEW: a second activity on the same asset/work order to show
+            # recent-first ordering
             {
                 "workspace_slug": "home-lab",
                 "workorder_idx": 1,
@@ -553,7 +622,7 @@ class Command(BaseCommand):
                 "kind": "checked",
                 "note": "Quick follow-up check on monitoring node.",
                 "performed_by": "tiny",
-                "occurred_delta_hours": -1,  # more recent than the first
+                "occurred_delta_hours": -1,
             },
         ]
 
@@ -575,5 +644,3 @@ class Command(BaseCommand):
                     "performed_by": performed_by,
                 },
             )
-
-        self.stdout.write(self.style.SUCCESS("Demo data seeded successfully."))
