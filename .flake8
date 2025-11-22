@@ -1,4 +1,42 @@
+# .flake8
 [flake8]
-exclude = migrations
-statistics = True
 max-line-length = 88
+
+exclude =
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .mypy_cache,
+    .tox,
+    .nox,
+    .venv,
+    venv,
+    env,
+    build,
+    dist,
+    node_modules,
+    static,
+    media,
+    **/migrations/**
+
+extend-ignore =
+    # Black-compatible slice spacing
+    E203
+    # Black prefers breaking before binary operators
+    W503
+
+max-complexity = 10
+
+per-file-ignores =
+    # Django migrations are auto-generated; don't lint them.
+    **/migrations/*.py: E501,F401,F841
+    # __init__.py often re-exports names intentionally
+    **/__init__.py: F401
+    # settings files often use wildcard imports / unused imports by design
+    **/settings/*.py: F403,F405,F401
+    # urls.py may import for side effects / urlpatterns
+    **/urls.py: F401
+
+count = True
+show-source = True
+statistics = True
