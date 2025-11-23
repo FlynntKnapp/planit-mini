@@ -24,12 +24,9 @@ class IsAuthenticatedReadOnlyOrManager(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Global write checks
-        if user.is_staff or self._in_maintenance_manager_group(user):
-            return True
-
-        # For unsafe methods we may further check object-level in has_object_permission
-        return True
+        # For any write at all (including POST),
+        # require staff or maintenance_manager.
+        return user.is_staff or self._in_maintenance_manager_group(user)
 
     def has_object_permission(self, request, view, obj):
         user = request.user

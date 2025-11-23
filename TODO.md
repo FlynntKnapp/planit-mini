@@ -78,26 +78,26 @@ config/**init**.py # celery loader
 ## Sprint 2 — API (DRF) (1–3 sessions)
 
 **Serializers**
-- [ ] `FormFactorSerializer`, `OSSerializer`, `ApplicationSerializer`, `ProjectSerializer`
-- [ ] `AssetSerializer` (include apps list)
-- [ ] `MaintenanceTaskSerializer`, `WorkOrderSerializer`, `ActivityInstanceSerializer`
+- [x] `FormFactorSerializer`, `OSSerializer`, `ApplicationSerializer`, `ProjectSerializer`
+- [x] `AssetSerializer` (include apps list)
+- [x] `MaintenanceTaskSerializer`, `WorkOrderSerializer`, `ActivityInstanceSerializer`
 
 **Viewsets + Router**
-- [ ] ModelViewSets for all models, registered on `/api/...`
+- [x] ModelViewSets for all models, registered on `/api/...`
 
 **Permissions**
-- [ ] Read: authenticated users
-- [ ] Write: users in `maintenance_manager` group
-- [ ] Object-level (optional): owners/managers for changes
+- [x] Read: authenticated users
+- [x] Write: users in `maintenance_manager` group or `user.is_staff`
+- [x] Object-level (optional): owners/managers for changes
 
 **Pagination/Filters/Ordering**
-- [ ] Default `PageNumberPagination` (20)
-- [ ] Filters:
+- [x] Default `PageNumberPagination` (20)
+- [x] Filters:
   - `Asset`: by `form_factor`, `os`, `applications`, `location`, `warranty_expires__lt`, `name__icontains`
   - `WorkOrder`: by `asset`, `task`, `status`, `due__date` range
   - `ActivityInstance`: by `asset`, `kind`, `occurred_at` range
-- [ ] Ordering: `?ordering=name` (Assets) / `?ordering=-due` (WorkOrders) / `?ordering=-occurred_at` (Activities)
-- [ ] Throttling: simple user throttle for non-staff
+- [x] Ordering: `?ordering=name` (Assets) / `?ordering=-due` (WorkOrders) / `?ordering=-occurred_at` (Activities)
+- [x] Throttling: simple user throttle for non-staff
 
 ## Sprint 3 — Celery & Scheduled Job (1–2 sessions)
 

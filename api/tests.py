@@ -80,18 +80,18 @@ class WorkspaceAPITest(APITestSetup):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
 
-    def test_viewer_can_create_workspace(self):
-        """Viewer users can create workspaces (per permission design)."""
+    def test_viewer_cannot_create_workspace(self):
+        """
+        Viewer users cannot create workspaces (write requires maintenance_manager or staff).  # noqa E501
+        """
         self.client.force_authenticate(user=self.viewer_user)
         response = self.client.post(
             "/api/workspaces/", {"name": "New Workspace", "slug": "new-ws"}
         )
-        # Permission allows creates at global level (no object-level check for POST)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["name"], "New Workspace")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_manager_can_create_workspace(self):
-        """Manager users can create workspaces."""
+        """Manager users in maintenance_manager group can create workspaces."""
         self.client.force_authenticate(user=self.manager_user)
         response = self.client.post(
             "/api/workspaces/", {"name": "New Workspace", "slug": "new-ws"}
@@ -155,8 +155,10 @@ class AssetAPITest(APITestSetup):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
 
-    def test_viewer_can_create_asset(self):
-        """Viewer users can create assets (per permission design)."""
+    def test_viewer_cannot_create_asset(self):
+        """
+        Viewer users cannot create assets (write requires maintenance_manager or staff).  # noqa E501
+        """
         self.client.force_authenticate(user=self.viewer_user)
         response = self.client.post(
             "/api/assets/",
@@ -166,12 +168,10 @@ class AssetAPITest(APITestSetup):
                 "kind": "LAP",
             },
         )
-        # Permission allows creates at global level (no object-level check for POST)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["name"], "New Asset")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_manager_can_create_asset(self):
-        """Manager users can create assets."""
+        """Manager users in maintenance_manager group can create assets."""
         self.client.force_authenticate(user=self.manager_user)
         response = self.client.post(
             "/api/assets/",
@@ -233,7 +233,7 @@ class WorkOrderAPITest(APITestSetup):
 
     def test_work_order_ordering(self):
         """Work orders are ordered by due date descending by default."""
-        # Create another work order with earlier due date
+        # Create another work order with later due date
         WorkOrder.objects.create(
             workspace=self.workspace1,
             asset=self.asset,
