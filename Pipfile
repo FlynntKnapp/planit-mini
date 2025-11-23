@@ -25,6 +25,7 @@ django-filter = "*"
 [dev-packages]
 pytest-django = "*"
 pytest-cov = "*"
+requests = "*"
 
 [requires]
 python_version = "3.12"
