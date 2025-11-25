@@ -101,7 +101,7 @@ config/**init**.py # celery loader
 
 ## Sprint 3 — Celery & Scheduled Job (1–2 sessions)
 
-- [ ] Enable **django-celery-beat** in settings; DB schedules
+- [x] Enable **django-celery-beat** in settings; DB schedules
 - [ ] **Generator task**: `work.tasks.generate_workorders()`
   - Reads `MaintenanceTask.cadence` (monthly/weekly) and creates upcoming `WorkOrder`s per `Asset`
 - [ ] **Healthcheck task** (optional): `core.tasks.daily_asset_healthcheck()` — flag overdue; auto-create `ActivityInstance(kind="checked")`
