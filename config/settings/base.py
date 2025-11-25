@@ -157,6 +157,8 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
 
+TEST_EMAIL_ADDRESS = os.getenv("TEST_EMAIL_ADDRESS", "test@example.com")
+
 # AWS S3 (optional; leave envs empty in dev)
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")

@@ -2,6 +2,8 @@
 
 ## Commands
 
+- `heroku run --app planit-mini-prod python manage.py shell`
+
 ### This Project
 
 1. `pipenv install`
