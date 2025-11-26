@@ -2,8 +2,8 @@
 - [https://github.com/FlynntKnapp/planit-mini](https://github.com/FlynntKnapp/planit-mini)
 
 > Template notes (what’s already there):  
-> • Generated from **DjangoStarter-heroku** (CustomUser, DEV/PROD settings, Pipenv, Procfile)
-> • Repo shows `accounts/`, `config/`, `templates/`, `Procfile`, `.flake8`, `README.md`, `LICENSE (GPL-3.0)`, and a `.circleci/` folder scaffold.
+> • Generated from **DjangoStarter-heroku** (CustomUser, DEV/PROD settings, Pipenv, Procfile)  
+> • Repo shows `accounts/`, `config/`, `templates/`, `Procfile`, `.flake8`, `README.md`, `LICENSE (GPL-3.0)`, and a `.circleci/` folder scaffold.  
 > • README explicitly lists **Custom user**, **separate DEV/PROD settings**, **Pipfile included**, **Heroku Procfile included**, and Heroku setup steps.
 
 # Plan-It Mini (Django + DRF) — Tiny-Step Roadmap (Assets + Maintenance)
@@ -25,7 +25,7 @@
   - `python manage.py startapp core && startapp assets && startapp work`
 - [x] **Install base apps already present**: `accounts` custom user.
 - [x] **Settings split**: DEV/PROD present in template; keep and extend.
-- [ ] **Postgres** via `dj-database-url` (`DATABASE_URL`)
+- [x] **Postgres** via `dj-database-url` (`DATABASE_URL`)
 - [ ] **Redis cache** (`REDIS_URL`) + DRF settings stub
 - [x] **Celery**: add `config/celery.py` + loader in `config/__init__.py`
 - [x] **.env.example**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DEBUG`, `ALLOWED_HOSTS`
@@ -39,10 +39,10 @@
 **Files to add now**
 ```
 
-Makefile  
-.env.example  
-config/settings/{base.py,local.py,prod.py} # extend existing split if needed  
-config/celery.py  
+Makefile
+.env.example
+config/settings/{base.py,local.py,prod.py} # extend existing split if needed
+config/celery.py
 config/**init**.py # celery loader
 
 ```
@@ -93,9 +93,9 @@ config/**init**.py # celery loader
 **Pagination/Filters/Ordering**
 - [x] Default `PageNumberPagination` (20)
 - [x] Filters:
-  - `Asset`: by `form_factor`, `os`, `applications`, `location`, `warranty_expires__lt`, `name__icontains`
-  - `WorkOrder`: by `asset`, `task`, `status`, `due__date` range
-  - `ActivityInstance`: by `asset`, `kind`, `occurred_at` range
+  - [x] `Asset`: by `form_factor`, `os`, `applications`, `location`, `warranty_expires__lt`, `name__icontains`
+  - [x] `WorkOrder`: by `asset`, `task`, `status`, `due__date` range
+  - [x] `ActivityInstance`: by `asset`, `kind`, `occurred_at` range
 - [x] Ordering: `?ordering=name` (Assets) / `?ordering=-due` (WorkOrders) / `?ordering=-occurred_at` (Activities)
 - [x] Throttling: simple user throttle for non-staff
 
@@ -119,11 +119,11 @@ config/**init**.py # celery loader
 
 - [ ] **Test stack**: `pytest`, `pytest-django`, `pytest-cov`, `model_bakery` or `factory_boy`, `freezegun`
 - [ ] **Factories**: `AssetFactory`, `FormFactorFactory`, `OSFactory`, `ApplicationFactory`, `ProjectFactory`, `MaintenanceTaskFactory`, `WorkOrderFactory`, `ActivityInstanceFactory`, `UserFactory(with Group)`
-- [ ] **Model tests**: str/repr; relationships; `WorkOrder.status` transitions; cadence parsing edge cases
-- [ ] **Admin tests**: list loads; filters; actions; perms
-- [ ] **API tests**: list/detail/create/update/delete; perms by role; pagination; filters; ordering; throttling
+- [x] **Model tests**: str/repr; relationships; `WorkOrder.status` transitions; cadence parsing edge cases
+- [x] **Admin tests**: list loads; filters; actions; perms
+- [x] **API tests**: list/detail/create/update/delete; perms by role; pagination; filters; ordering; throttling
 - [ ] **Celery tests**: unit test `generate_workorders` & healthcheck (freeze time)
-- [ ] **Settings smoke**: prod env parsing
+- [x] **Settings smoke**: prod env parsing
 - [ ] **Coverage gate**: `--cov-fail-under=95`
 
 ## Sprint 6 — CI (CircleCI) (1 session)
@@ -135,11 +135,13 @@ config/**init**.py # celery loader
 ## Sprint 7 — Heroku (vanilla) (1 session)
 
 - [x] `Procfile` present; keep `web:` and add `worker:` & `beat:` entries for Celery.
-  ```
-  web: gunicorn config.wsgi --log-file -  
-  worker: celery -A config worker -l info  
-  beat: celery -A config beat -l info
-  ```
+```
+
+web: gunicorn config.wsgi --log-file -
+worker: celery -A config worker -l info
+beat: celery -A config beat -l info
+
+```
 - [x] `.python-version`
 - [x] `Pipfile`: add `gunicorn`, `psycopg2-binary`, `config.utils.get_database_config_variables`, `whitenoise`, `django-celery-beat`
 - [x] `settings/prod.py`: `DEBUG=False`, `ALLOWED_HOSTS`, `SECURE_*`, `whitenoise`
