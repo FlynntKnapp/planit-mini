@@ -28,3 +28,10 @@ STATICFILES_DIRS = [BASE_DIR / "static"]  # noqa: F405
 
 # Dev nicety: console email
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "planit-mini-dev",
+    }
+}

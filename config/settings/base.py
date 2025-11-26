@@ -182,6 +182,30 @@ CELERY_TASK_ALWAYS_EAGER = (
     os.getenv("CELERY_TASK_ALWAYS_EAGER", "False").lower() == "true"
 )
 
+# Prefer a dedicated cache URL, otherwise fall back to Heroku Redis env vars.
+DJANGO_CACHE_URL = (
+    os.getenv("DJANGO_CACHE_URL")
+    or os.getenv("REDISCLOUD_URL")
+    or os.getenv("REDIS_URL")  # heroku-redis uses this
+    or "redis://127.0.0.1:6379/1"  # local fallback
+)
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": DJANGO_CACHE_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # Optional niceties:
+            # "IGNORE_EXCEPTIONS": True,  # behave like LocMem cache if Redis is down
+        },
+    }
+}
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
 # Logging (minimal; expand in prod.py)
 LOGGING = {
     "version": 1,
