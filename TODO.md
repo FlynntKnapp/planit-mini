@@ -143,7 +143,7 @@ config/**init**.py # celery loader
 - [x] `.python-version`
 - [x] `Pipfile`: add `gunicorn`, `psycopg2-binary`, `config.utils.get_database_config_variables`, `whitenoise`, `django-celery-beat`
 - [x] `settings/prod.py`: `DEBUG=False`, `ALLOWED_HOSTS`, `SECURE_*`, `whitenoise`
-- [ ] **Addons**: Heroku Postgres + Heroku Redis
+- [x] **Addons**: Heroku Postgres + Heroku Redis
 - [x] **Config Vars**: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `DJANGO_SETTINGS_MODULE=config.settings.prod`
 - [ ] `collectstatic`, smoke test `/api/assets/`, `/api/workorders/`
 
