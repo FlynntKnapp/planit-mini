@@ -1,3 +1,5 @@
+# Heroku Dyno Runbook
+
 ## Turn apps ON (web + worker)
 ```
 heroku ps:scale web=1 worker=1 -a flynnt-knapp
