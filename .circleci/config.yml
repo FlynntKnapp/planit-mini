@@ -57,7 +57,7 @@ jobs:
           name: Deploy develop to Heroku DEV
           command: |
             # Push local develop branch, but store it on Heroku as main
-            git push https://heroku:${HEROKU_API_KEY}@git.heroku.com/planit-mini-dev.git develop:main
+            git push https://heroku:${HEROKU_API_KEY}@git.heroku.com/planit-mini-staging.git develop:main
 
 workflows:
   version: 2
