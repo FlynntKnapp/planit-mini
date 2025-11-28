@@ -27,6 +27,8 @@ coverage = "*"
 isort = "*"
 flake8 = "*"
 black = "*"
+playwright = "*"
+pytest-playwright = "*"
 
 [requires]
 python_version = "3.12"
