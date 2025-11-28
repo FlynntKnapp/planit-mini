@@ -35,8 +35,11 @@ class APITestSetup(TestCase):
             username="non_member", password="testpass123"
         )
 
-        # Create maintenance_manager group and add manager_user
-        self.maintenance_manager_group = Group.objects.create(
+        # Create or reuse maintenance_manager group and add manager_user
+        # NOTE: accounts.signals.create_maintenance_groups already creates
+        #       "maintenance_manager" on post_migrate, so we must NOT use
+        #       Group.objects.create() here or we'll hit a UNIQUE constraint.
+        self.maintenance_manager_group, _ = Group.objects.get_or_create(
             name="maintenance_manager"
         )
         self.manager_user.groups.add(self.maintenance_manager_group)
@@ -82,7 +85,7 @@ class WorkspaceAPITest(APITestSetup):
 
     def test_viewer_cannot_create_workspace(self):
         """
-        Viewer users cannot create workspaces (write requires maintenance_manager or staff).  # noqa E501
+        Viewer users cannot create workspaces (write requires maintenance_manager or staff).  # noqa: E501
         """
         self.client.force_authenticate(user=self.viewer_user)
         response = self.client.post(
@@ -157,7 +160,7 @@ class AssetAPITest(APITestSetup):
 
     def test_viewer_cannot_create_asset(self):
         """
-        Viewer users cannot create assets (write requires maintenance_manager or staff).  # noqa E501
+        Viewer users cannot create assets (write requires maintenance_manager or staff).
         """
         self.client.force_authenticate(user=self.viewer_user)
         response = self.client.post(

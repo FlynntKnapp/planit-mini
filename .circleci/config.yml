@@ -29,6 +29,7 @@ jobs:
           command: |
             pipenv run pytest \
               --cov=accounts \
+              --cov=api \
               --cov=assets \
               --cov=core \
               --cov=work \
