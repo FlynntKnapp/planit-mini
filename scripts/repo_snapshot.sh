@@ -8,7 +8,7 @@ set -euo pipefail
 # Adjust the path if the script lives in a subdir
 . "$(dirname "$0")/tree_ignore_pattern.sh"
 
-SNAPSHOT="planit-mini-snapshot-$(date +%Y%m%d-%H%M%S).txt"
+SNAPSHOT="repo_snapshots/planit-mini-snapshot-$(date +%Y%m%d-%H%M%S).txt"
 
 {
   echo "===== TREE ====="
