@@ -6,7 +6,7 @@ heroku ps:scale web=1 worker=1 -a flynnt-knapp
 ```
 
 ```
-heroku ps:scale web=1 worker=1 -a planit-mini-dev
+heroku ps:scale web=1 worker=1 -a planit-mini-staging
 ```
 
 ```
@@ -20,7 +20,7 @@ heroku ps:scale web=0 worker=0 -a flynnt-knapp
 ```
 
 ```
-heroku ps:scale web=0 worker=0 -a planit-mini-dev
+heroku ps:scale web=0 worker=0 -a planit-mini-staging
 ```
 
 ```
@@ -33,7 +33,7 @@ heroku ps:scale web=1 worker=0 -a flynnt-knapp
 ```
 
 ```
-heroku ps:scale web=1 worker=0 -a planit-mini-dev
+heroku ps:scale web=1 worker=0 -a planit-mini-staging
 ```
 
 ```
@@ -50,7 +50,7 @@ Use these when you want to **use the site and run background tasks** (emails, sc
 
 ```bash
 heroku ps:scale web=1 worker=1 -a flynnt-knapp
-heroku ps:scale web=1 worker=1 -a planit-mini-dev
+heroku ps:scale web=1 worker=1 -a planit-mini-staging
 heroku ps:scale web=1 worker=1 -a planit-mini-prod
 ```
 
@@ -65,7 +65,7 @@ Use these **after you’re done** testing or demoing:
 
 ```bash
 heroku ps:scale web=0 worker=0 -a flynnt-knapp
-heroku ps:scale web=0 worker=0 -a planit-mini-dev
+heroku ps:scale web=0 worker=0 -a planit-mini-staging
 heroku ps:scale web=0 worker=0 -a planit-mini-prod
 ```
 
@@ -81,7 +81,7 @@ Use these if you ever want to **just click around the site** without running any
 
 ```bash
 heroku ps:scale web=1 worker=0 -a flynnt-knapp
-heroku ps:scale web=1 worker=0 -a planit-mini-dev
+heroku ps:scale web=1 worker=0 -a planit-mini-staging
 heroku ps:scale web=1 worker=0 -a planit-mini-prod
 ```
 
