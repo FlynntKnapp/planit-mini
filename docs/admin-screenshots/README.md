@@ -4,6 +4,22 @@ This directory contains comprehensive screenshots of the planit-mini Django admi
 
 ## Screenshot Index
 
+### Dashboard
+- **00-admin-dashboard.png** - Main Django admin dashboard showing all registered apps and models
+
+### Accounts Models (accounts app)
+
+#### CustomUser (User Management)
+- **01-accounts-customuser-list.png** - User list with custom columns (username, email, registration_accepted, is_staff, is_superuser)
+  - Shows custom bulk actions for marking users as registration accepted/unaccepted
+  - Multiple filters including registration_accepted, staff status, superuser status, active, and groups
+- **02-accounts-customuser-detail-moderator-permissions.png** - User detail/edit view highlighting:
+  - Custom "Moderator Permissions" fieldset with registration_accepted field
+  - Positioned between "Personal info" and "Permissions" sections
+- **03-accounts-customuser-add-form.png** - Add user form showing:
+  - Custom add_fieldsets with registration_accepted field visible during user creation
+  - Groups and permissions selectable at creation time
+
 ### Core Models (core app)
 
 #### Workspace
