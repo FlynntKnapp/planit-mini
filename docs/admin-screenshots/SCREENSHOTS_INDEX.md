@@ -227,4 +227,4 @@ These screenshots are intended to:
 3. Help onboard new developers to the project
 4. Showcase Django admin best practices
 
-All screenshots were captured on January 17, 2026, using Django 5.2.8 with Python 3.12.
+All screenshots were captured using Django 5.2.8 with Python 3.12.

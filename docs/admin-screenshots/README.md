@@ -105,6 +105,5 @@ This directory contains comprehensive screenshots of the planit-mini Django admi
 
 - All screenshots are full-page captures showing the complete admin interface
 - Screenshots were captured with the Django server running at localhost:8000/admin/
-- Sample data was created using the create_sample_data.py script
+- Sample data was created using a data seeding script
 - The admin user was already logged in for all captures
-- Timestamps in screenshots reflect January 2026 (server time: UTC-5)
