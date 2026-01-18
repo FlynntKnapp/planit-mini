@@ -106,6 +106,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
         "status",
         "assigned_to",
         "requested_by",
+        "estimated_hours",
     )
     list_filter = (
         "workspace",
@@ -175,6 +176,7 @@ class ActivityInstanceAdmin(admin.ModelAdmin):
         "work_order",
         "occurred_at",
         "performed_by",
+        "actual_hours",
     )
     list_filter = ("workspace", "kind")
     search_fields = (

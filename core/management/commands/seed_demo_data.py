@@ -435,6 +435,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "tiny",
                 "requested_by": "alice",
+                "estimated_hours": 1.5,
             },
             {
                 "workspace_slug": "home-lab",
@@ -444,6 +445,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "alice",
                 "requested_by": "tiny",
+                "estimated_hours": 0.5,
             },
             {
                 "workspace_slug": "home-lab",
@@ -453,6 +455,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "bob",
                 "requested_by": "tiny",
+                "estimated_hours": 2.0,
             },
             {
                 "workspace_slug": "laptop-fleet",
@@ -462,6 +465,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "tiny",
                 "requested_by": "bob",
+                "estimated_hours": 1.0,
             },
             {
                 "workspace_slug": "laptop-fleet",
@@ -471,6 +475,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "alice",
                 "requested_by": "tiny",
+                "estimated_hours": 0.25,
             },
             {
                 "workspace_slug": "client-a",
@@ -480,6 +485,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "tiny",
                 "requested_by": "alice",
+                "estimated_hours": 3.0,
             },
         ]
 
@@ -492,6 +498,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "alice",
                 "requested_by": "tiny",
+                "estimated_hours": 0.5,
             },
             {
                 "workspace_slug": "home-lab",
@@ -501,6 +508,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "tiny",
                 "requested_by": "alice",
+                "estimated_hours": 1.5,
             },
             {
                 "workspace_slug": "laptop-fleet",
@@ -510,6 +518,7 @@ class Command(BaseCommand):
                 "status": "open",
                 "assigned_to": "tiny",
                 "requested_by": "bob",
+                "estimated_hours": 1.0,
             },
         ]
 
@@ -545,6 +554,7 @@ class Command(BaseCommand):
                     "status": data["status"],
                     "assigned_to": assigned_to,
                     "requested_by": requested_by,
+                    "estimated_hours": data.get("estimated_hours"),
                 },
             )
             workorders[idx] = wo
@@ -567,6 +577,7 @@ class Command(BaseCommand):
                 "note": "Checked CPU temperature and disk usage.",
                 "performed_by": "tiny",
                 "occurred_delta_hours": -24,
+                "actual_hours": 0.25,
             },
             {
                 "workspace_slug": "home-lab",
@@ -576,6 +587,7 @@ class Command(BaseCommand):
                 "note": "Verified last night's backup snapshot.",
                 "performed_by": "alice",
                 "occurred_delta_hours": -12,
+                "actual_hours": 0.5,
             },
             {
                 "workspace_slug": "home-lab",
@@ -585,6 +597,7 @@ class Command(BaseCommand):
                 "note": "Installed security updates on hypervisor.",
                 "performed_by": "bob",
                 "occurred_delta_hours": -6,
+                "actual_hours": 1.75,
             },
             {
                 "workspace_slug": "laptop-fleet",
@@ -594,6 +607,7 @@ class Command(BaseCommand):
                 "note": "Applied OS patches and restarted.",
                 "performed_by": "tiny",
                 "occurred_delta_hours": -3,
+                "actual_hours": 1.0,
             },
             {
                 "workspace_slug": "laptop-fleet",
@@ -603,6 +617,7 @@ class Command(BaseCommand):
                 "note": "Verified VPN connects over cellular.",
                 "performed_by": "alice",
                 "occurred_delta_hours": -1,
+                "actual_hours": 0.25,
             },
             {
                 "workspace_slug": "client-a",
@@ -612,6 +627,7 @@ class Command(BaseCommand):
                 "note": "Checked WAL archiving and backup status.",
                 "performed_by": "tiny",
                 "occurred_delta_hours": -2,
+                "actual_hours": 0.5,
             },
             # NEW: a second activity on the same asset/work order to show
             # recent-first ordering
@@ -623,6 +639,7 @@ class Command(BaseCommand):
                 "note": "Quick follow-up check on monitoring node.",
                 "performed_by": "tiny",
                 "occurred_delta_hours": -1,
+                "actual_hours": 0.15,
             },
         ]
 
@@ -642,5 +659,6 @@ class Command(BaseCommand):
                 defaults={
                     "note": data["note"],
                     "performed_by": performed_by,
+                    "actual_hours": data.get("actual_hours"),
                 },
             )
