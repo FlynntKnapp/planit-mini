@@ -157,6 +157,7 @@ class WorkOrderSerializer(serializers.ModelSerializer):
             "status",
             "assigned_to",
             "requested_by",
+            "estimated_hours",
         ]
 
 
@@ -182,4 +183,5 @@ class ActivityInstanceSerializer(serializers.ModelSerializer):
             "note",
             "occurred_at",
             "performed_by",
+            "actual_hours",
         ]

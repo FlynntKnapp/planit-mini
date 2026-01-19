@@ -57,6 +57,13 @@ class WorkOrder(models.Model):
         on_delete=models.SET_NULL,
         related_name="requested_workorders",
     )
+    estimated_hours = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Estimated time to complete this work order in hours",
+    )
 
     def __str__(self) -> str:
         return f"{self.task} → {self.asset} [{self.status}]"
@@ -90,6 +97,13 @@ class ActivityInstance(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="performed_activities",
+    )
+    actual_hours = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Actual time spent on this activity in hours",
     )
 
     def __str__(self) -> str:
