@@ -97,6 +97,7 @@ def test_work_order_admin_configuration():
         "status",
         "assigned_to",
         "requested_by",
+        "estimated_hours",
     )
 
     # Existing filters plus due window filter
@@ -148,6 +149,7 @@ def test_activity_instance_admin_configuration():
         "work_order",
         "occurred_at",
         "performed_by",
+        "actual_hours",
     )
 
     for field in ("workspace", "kind"):

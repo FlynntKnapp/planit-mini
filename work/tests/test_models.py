@@ -286,3 +286,65 @@ def test_set_null_on_user_delete_for_assigned_and_performed(
     assert wo.assigned_to is None
     assert wo.requested_by is None
     assert activity.performed_by is None
+
+
+@pytest.mark.django_db
+def test_workorder_estimated_hours_optional(workspace):
+    asset = _create_asset(workspace)
+    task = MaintenanceTask.objects.create(
+        workspace=workspace,
+        name="Test Task",
+        cadence="weekly",
+        description="Testing estimated hours",
+    )
+    due = timezone.now()
+
+    # Can create without estimated_hours
+    wo_no_estimate = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=due,
+    )
+    assert wo_no_estimate.estimated_hours is None
+
+    # Can create with estimated_hours
+    wo_with_estimate = WorkOrder.objects.create(
+        workspace=workspace,
+        asset=asset,
+        task=task,
+        due=due,
+        estimated_hours=2.5,
+    )
+    wo_with_estimate.refresh_from_db()
+    assert wo_with_estimate.estimated_hours == 2.5
+
+
+@pytest.mark.django_db
+def test_activityinstance_actual_hours_optional(workspace):
+    asset = _create_asset(workspace)
+    occurred_at = timezone.now()
+
+    # Can create without actual_hours
+    activity_no_hours = ActivityInstance.objects.create(
+        workspace=workspace,
+        work_order=None,
+        asset=asset,
+        kind="checked",
+        note="Quick check",
+        occurred_at=occurred_at,
+    )
+    assert activity_no_hours.actual_hours is None
+
+    # Can create with actual_hours
+    activity_with_hours = ActivityInstance.objects.create(
+        workspace=workspace,
+        work_order=None,
+        asset=asset,
+        kind="patched",
+        note="Long patching session",
+        occurred_at=occurred_at,
+        actual_hours=4.25,
+    )
+    activity_with_hours.refresh_from_db()
+    assert activity_with_hours.actual_hours == 4.25
